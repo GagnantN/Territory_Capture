@@ -10,6 +10,17 @@ screen = pg.display.set_mode(((0, 0)), pg.FULLSCREEN)
 clock = pg.time.Clock()
 
 
+# --- Murs ---
+WCOLOR = (200,80,80)
+walls = [
+    pg.Rect(150, 80, 500, 24),
+    pg.Rect(150, 380, 500, 24),
+    pg.Rect(150, 80, 24, 324),
+    pg.Rect(626, 80, 24, 324),
+    pg.Rect(300, 210, 200, 24),
+]
+
+
 # ---------- Bouton Quitter ----- #
 # Couleurs et police du bouton
 BLACK = (0, 0, 0)
@@ -34,7 +45,9 @@ while running:
 
     screen.fill((24,26,32))
 
-
+    # DESSIN
+    for w in walls:
+        pg.draw.rect(screen, WCOLOR, w)
     pg.draw.rect(screen, BLACK, button_rect)
     text_surf = font.render("Quitter", True, WHITE)
     screen.blit(text_surf, (button_rect.x + 10, button_rect.y + 5))
