@@ -19,7 +19,7 @@ font = pg.font.SysFont(None, 30)
 # Position bas gauche
 button_rect = pg.Rect(10, HEIGHT - 50, 120, 40)
 
-
+running = True
 while running:
 
     dt = clock.tick(FPS) / 1000.0
