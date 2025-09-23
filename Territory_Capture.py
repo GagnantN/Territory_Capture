@@ -29,6 +29,8 @@ from fonctions.boutons import button_rect, button_color, button_text_color, text
 
 running = True
 
+
+
 while running:
 
     dt = clock.tick(FPS) / 1000.0
