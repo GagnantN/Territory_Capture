@@ -18,7 +18,7 @@ clock = pg.time.Clock()
 # --------------------- IMPORT -------------------------- #
 
 # Maps
-WCOLOR, walls = create_map()
+WCOLOR, BCOLOR, walls = create_map()
 # Buttons Quitter
 from fonctions.boutons import button_rect, button_color, button_text_color, text_surface 
 # ------------------------------------------------------- #
@@ -50,6 +50,7 @@ while running:
     # Afficher la Map
     for w in walls :
         pg.draw.rect(screen, WCOLOR, w)
+        pg.draw.rect(screen, BCOLOR, w, 1)
 
 
     pg.display.flip()

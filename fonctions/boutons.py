@@ -1,9 +1,10 @@
 import pygame as pg
 
-HEIGHT = 1000
+HEIGHT = 10
+WIDTH = 2000
 
 # ------------------- BOUTTON QUITTER ------------------- #
-button_rect = pg.Rect(10, HEIGHT, 120, 40)
+button_rect = pg.Rect(WIDTH * 0.9 , HEIGHT, 120, 40)
 # Couleur
 button_color = (200, 0, 0)
 # Couleur du text

@@ -4,6 +4,7 @@ import pygame as pg
 
 def create_map():
     WCOLOR = (200,80,80)
+    BCOLOR = (50, 50, 50)
 
     walls = []
     ligne = 20
@@ -17,6 +18,6 @@ def create_map():
             walls.append(pg.Rect(x, y, taille, taille))
 
 
-    return WCOLOR, walls
+    return WCOLOR, BCOLOR, walls
 
 # ------------------------------------------------------- #
