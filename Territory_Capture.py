@@ -18,7 +18,7 @@ clock = pg.time.Clock()
 # --------------------- IMPORT -------------------------- #
 
 # Maps
-WCOLOR, BCOLOR, walls = create_map()
+WCOLOR, BCOLOR, walls = create_map(screen)
 # Buttons Quitter
 from fonctions.boutons import button_rect, button_color, button_text_color, text_surface 
 # ------------------------------------------------------- #
