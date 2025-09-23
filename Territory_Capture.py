@@ -1,4 +1,5 @@
 import pygame as pg, sys
+from fonctions.Map import create_map
 
 # -------------------- CONFIGURATION -------------------- #
 pg.init()
@@ -7,23 +8,20 @@ WIDTH, HEIGHT, FPS = 1500, 1000, 60
 # Ecran Fullscreen
 screen = pg.display.set_mode(((0, 0)), pg.FULLSCREEN)
 
+# Nom du Jeu
+pg.display.set_caption("Territory Capture")
+
+
 clock = pg.time.Clock()
 # ------------------------------------------------------- #
 
+# ---------------------RECUPERE DONNEES------------------ #
+
+WCOLOR, walls = create_map()
 
 
 
-# ------------------------- MURS ------------------------ #
-WCOLOR = (200,80,80)
-walls = [
-    pg.Rect(150, 80, 500, 24),
-    pg.Rect(150, 380, 500, 24),
-    pg.Rect(150, 80, 24, 324),
-    pg.Rect(626, 80, 24, 324),
-    pg.Rect(300, 210, 200, 24),
-]
 # ------------------------------------------------------- #
-
 
 
 
