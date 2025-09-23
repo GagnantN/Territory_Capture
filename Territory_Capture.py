@@ -1,6 +1,6 @@
 import pygame as pg, sys
 
-# ------------ CONFIG ------------ #
+# -------------------- CONFIGURATION -------------------- #
 pg.init()
 WIDTH, HEIGHT, FPS = 1500, 1000, 60
 
@@ -8,9 +8,12 @@ WIDTH, HEIGHT, FPS = 1500, 1000, 60
 screen = pg.display.set_mode(((0, 0)), pg.FULLSCREEN)
 
 clock = pg.time.Clock()
+# ------------------------------------------------------- #
 
 
-# --- Murs ---
+
+
+# ------------------------- MURS ------------------------ #
 WCOLOR = (200,80,80)
 walls = [
     pg.Rect(150, 80, 500, 24),
@@ -19,9 +22,12 @@ walls = [
     pg.Rect(626, 80, 24, 324),
     pg.Rect(300, 210, 200, 24),
 ]
+# ------------------------------------------------------- #
 
 
-# ---------- Bouton Quitter ----- #
+
+
+# ------------------- BOUTTON QUITTER ------------------- #
 # Couleurs et police du bouton
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -29,6 +35,8 @@ font = pg.font.SysFont(None, 30)
 
 # Position bas gauche
 button_rect = pg.Rect(10, HEIGHT - 50, 120, 40)
+# ------------------------------------------------------- #
+
 
 running = True
 while running:
@@ -56,4 +64,6 @@ while running:
 
     pg.display.flip()
 
-pg.quit(); sys.exit()  # QUITTEZ LE JEU
+
+# ----------------------- Quitter ----------------------- #
+pg.quit(); sys.exit()
