@@ -13,6 +13,11 @@ clock = pg.time.Clock()
 
 
 
+# ------------------------ IMPORT ----------------------- #
+from fonctions.boutons import button_rect, button_color, button_text_color, text_surface 
+# ------------------------------------------------------- #
+
+
 # ------------------------- MURS ------------------------ #
 WCOLOR = (200,80,80)
 walls = [
@@ -25,20 +30,8 @@ walls = [
 # ------------------------------------------------------- #
 
 
-
-
-# ------------------- BOUTTON QUITTER ------------------- #
-# Couleurs et police du bouton
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-font = pg.font.SysFont(None, 30)
-
-# Position bas gauche
-button_rect = pg.Rect(10, HEIGHT - 50, 120, 40)
-# ------------------------------------------------------- #
-
-
 running = True
+
 while running:
 
     dt = clock.tick(FPS) / 1000.0
@@ -49,17 +42,11 @@ while running:
 
         elif e.type == pg.MOUSEBUTTONDOWN:
             if button_rect.collidepoint(e.pos):
-                running = False
+                running = False # Quitter si clic sur le bouton
 
     screen.fill((24,26,32))
-
-    # DESSIN
-    for w in walls:
-        pg.draw.rect(screen, WCOLOR, w)
-    pg.draw.rect(screen, BLACK, button_rect)
-    text_surf = font.render("Quitter", True, WHITE)
-    screen.blit(text_surf, (button_rect.x + 10, button_rect.y + 5))
-
+    pg.draw.rect(screen, button_color, button_rect)
+    screen.blit(text_surface, (button_rect.x + 10, button_rect.y + 5))
 
 
     pg.display.flip()
