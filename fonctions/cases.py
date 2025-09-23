@@ -1,8 +1,26 @@
+import pygame as pg
+
+# Ecran Fullscreen
+screen = pg.display.set_mode(((0, 0)), pg.FULLSCREEN)
+# Récupère la taille actuelle de la fenêtre
+WIDTH, HEIGHT = screen.get_size()
+ligne = 20
+colonne = 20
+taille = min(WIDTH // (colonne + 5), HEIGHT // (ligne + 5))  # taille d’une case
+
+
+
 # ----------------- COULEUR TERRAINS -------------------- #
 eau = (50, 100, 200)
 montagne = (120, 120, 120)
 foret = (200, 200, 150)
 bordure = (0, 42, 9)
+
+# ------------------------------------------------------- #
+
+# ----------------- COULEUR JOUEURS  -------------------- #
+joueur_01 = (70, 130, 180)
+joueur_02 = (178, 34, 3)
 
 # ------------------------------------------------------- #
 
@@ -15,7 +33,7 @@ def create_eau():
     BCOLOR = (50, 50, 50)
 
     walls = []
-    taille = 20  # taille d’une case
+    taille  # taille d’une case
 
     return WCOLOR, BCOLOR, walls, taille
 # ------------------------------------------------------- #
@@ -29,7 +47,7 @@ def create_montagne():
     BCOLOR = (50, 50, 50)
 
     walls = []
-    taille = 20  # taille d’une case
+    taille  # taille d’une case
 
     return WCOLOR, BCOLOR, walls, taille
 # ------------------------------------------------------- #
@@ -43,8 +61,33 @@ def create_foret():
     BCOLOR = (50, 50, 50)
 
     walls = []
-    taille = 20  # taille d’une case
+    taille  # taille d’une case
 
     return WCOLOR, BCOLOR, walls, taille
 # ------------------------------------------------------- #
 
+
+
+# Case Joueur
+
+# ----------------------- JOUEUR 01 --------------------- #
+def create_joueur_01():
+    WCOLOR = joueur_01
+    BCOLOR = (50, 50, 50)
+
+    walls = []
+    taille  # taille d’une case
+
+    return WCOLOR, BCOLOR, walls, taille
+# ------------------------------------------------------- #
+
+# ----------------------- JOUEUR 02 --------------------- #
+def create_joueur_02():
+    WCOLOR = joueur_02
+    BCOLOR = (50, 50, 50)
+
+    walls = []
+    taille  # taille d’une case
+
+    return WCOLOR, BCOLOR, walls, taille
+# ------------------------------------------------------- #

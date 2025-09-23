@@ -1,4 +1,5 @@
 import pygame as pg
+from fonctions.cases import create_eau, create_foret, create_montagne, create_joueur_01, create_joueur_02
 
 # ------------------------- MAP ------------------------ #
 
