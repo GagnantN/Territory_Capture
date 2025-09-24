@@ -1,6 +1,6 @@
 import pygame as pg
-from fonctions.cases import create_eau, create_foret, create_montagne, create_joueur_01, create_joueur_02
-
+import random  # Donne nombre aléatoire
+from fonctions.cases import terrains
 # ------------------------- MAP ------------------------ #
 
 def create_map(screen):
@@ -8,10 +8,10 @@ def create_map(screen):
     # Récupère la taille actuelle de la fenêtre
     WIDTH, HEIGHT = screen.get_size()
 
-    WCOLOR = (200 , int(WIDTH * 0.1) % 256, int(HEIGHT * 0.1) % 256)
+    #WCOLOR = (191 , 183, 161)
     BCOLOR = (50, 50, 50)
 
-    walls = []
+    case_original = []
     ligne = 20
     colonne = 20
     taille = min(WIDTH // (colonne + 5), HEIGHT // (ligne + 5))  # taille d’une case
@@ -20,9 +20,15 @@ def create_map(screen):
         for j in range(colonne):
             x = int(WIDTH * 0.25) + j * taille
             y = int(HEIGHT * 0.1) + i * taille
-            walls.append(pg.Rect(x, y, taille, taille))
+            rect = pg.Rect(x, y, taille, taille)
+
+            # Choisir aléatoire le type de terrain
+            terrain_couleur = random.choice(list(terrains.values()))
+
+            case_original.append((rect, terrain_couleur))
 
 
-    return WCOLOR, BCOLOR, walls
+
+    return BCOLOR, case_original
 
 # ------------------------------------------------------- #
