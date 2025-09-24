@@ -1,5 +1,7 @@
 import pygame as pg
 
+pg.init()  # pour s’assurer que les polices sont dispo
+
 HEIGHT = 10
 WIDTH = 2000
 
