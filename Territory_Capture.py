@@ -18,7 +18,7 @@ clock = pg.time.Clock()
 # --------------------- IMPORT -------------------------- #
 
 # Maps
-WCOLOR, BCOLOR, walls = create_map(screen)
+BCOLOR, case_original = create_map(screen)
 # Buttons Quitter
 from fonctions.boutons import button_rect, button_color, button_text_color, text_surface 
 # ------------------------------------------------------- #
@@ -48,9 +48,9 @@ while running:
     screen.blit(text_surface, (button_rect.x + 10, button_rect.y + 5))
 
     # Afficher la Map
-    for w in walls :
-        pg.draw.rect(screen, WCOLOR, w)
-        pg.draw.rect(screen, BCOLOR, w, 1)
+    for rect, couleur in case_original :
+        pg.draw.rect(screen, couleur, rect)  # remplissage
+        pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
 
 
     pg.display.flip()
