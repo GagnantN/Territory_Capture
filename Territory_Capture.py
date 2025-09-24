@@ -83,12 +83,16 @@ def page_accueil():
 
 # ------------------------ JEU -------------------------- #
 def jeu():
+    # Maps
+    BCOLOR, case_original = create_map(screen)
     running = True
 
     # Création de la map
-    WCOLOR, BCOLOR, walls = create_map(screen)
+    #WCOLOR, BCOLOR, walls = create_map(screen)
 
     while running:
+        dt = clock.tick(60) / 1000.0
+
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
@@ -97,10 +101,31 @@ def jeu():
 
         screen.fill((24, 26, 32))
 
-        # Dessiner les cases de la map
-        for wall in walls:
-            pg.draw.rect(screen, WCOLOR, wall)     # Mur plein
-            pg.draw.rect(screen, BCOLOR, wall, 1)  # Contour
+    # Dessiner les cases de la map
+        for rect, couleur in case_original :
+            pg.draw.rect(screen, couleur, rect)  # remplissage
+            pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
+
+     # while running:
+
+#     dt = clock.tick(FPS) / 1000.0
+
+#     for e in pg.event.get():
+#         if e.type == pg.QUIT:
+#             running = False
+
+#         elif e.type == pg.MOUSEBUTTONDOWN:
+#             if button_rect.collidepoint(e.pos):
+#                 running = False # Quitter si clic sur le bouton
+
+#     screen.fill((24,26,32))
+#     pg.draw.rect(screen, button_color, button_rect)
+#     screen.blit(text_surface, (button_rect.x + 10, button_rect.y + 5))
+
+#     # Afficher la Map
+#     for rect, couleur in case_original :
+#         pg.draw.rect(screen, couleur, rect)  # remplissage
+#         pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
 
 
 
@@ -145,9 +170,11 @@ sys.exit()
 
 
 # --------------------- IMPORT -------------------------- #
-# Maps
-# WCOLOR, BCOLOR, walls = create_map(screen)
-# ------------------------------------------------------- #
+# # Maps
+# BCOLOR, case_original = create_map(screen)
+# # Buttons Quitter
+# from fonctions.boutons import button_rect, button_color, button_text_color, text_surface 
+# # ------------------------------------------------------- #
 
 
 
@@ -184,6 +211,29 @@ sys.exit()
 #     pg.display.flip()
 # ------------------------------------------------------- #
 
+# while running:
+
+#     dt = clock.tick(FPS) / 1000.0
+
+#     for e in pg.event.get():
+#         if e.type == pg.QUIT:
+#             running = False
+
+#         elif e.type == pg.MOUSEBUTTONDOWN:
+#             if button_rect.collidepoint(e.pos):
+#                 running = False # Quitter si clic sur le bouton
+
+#     screen.fill((24,26,32))
+#     pg.draw.rect(screen, button_color, button_rect)
+#     screen.blit(text_surface, (button_rect.x + 10, button_rect.y + 5))
+
+#     # Afficher la Map
+#     for rect, couleur in case_original :
+#         pg.draw.rect(screen, couleur, rect)  # remplissage
+#         pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
+
+
+#     pg.display.flip()
 
 
 # ----------------------- Quitter ----------------------- #

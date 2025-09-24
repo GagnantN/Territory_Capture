@@ -11,11 +11,14 @@ taille = min(WIDTH // (colonne + 5), HEIGHT // (ligne + 5))  # taille d’une ca
 
 
 # ----------------- COULEUR TERRAINS -------------------- #
-eau = (50, 100, 200)
-montagne = (120, 120, 120)
-foret = (200, 200, 150)
-bordure = (0, 42, 9)
+terrains = {
+    "eau" : (50, 100, 200),
+    "montagne" : (120, 120, 120),
+    "foret" : (200, 200, 150),
+    "bordure" : (0, 42, 9),
+}
 
+'''
 # ------------------------------------------------------- #
 
 # ----------------- COULEUR JOUEURS  -------------------- #
@@ -32,10 +35,10 @@ def create_eau():
     WCOLOR = eau
     BCOLOR = (50, 50, 50)
 
-    walls = []
+    case = []
     taille  # taille d’une case
 
-    return WCOLOR, BCOLOR, walls, taille
+    return WCOLOR, BCOLOR, case, taille
 # ------------------------------------------------------- #
 
 
@@ -46,10 +49,10 @@ def create_montagne():
     WCOLOR = montagne
     BCOLOR = (50, 50, 50)
 
-    walls = []
+    case = []
     taille  # taille d’une case
 
-    return WCOLOR, BCOLOR, walls, taille
+    return WCOLOR, BCOLOR, case, taille
 # ------------------------------------------------------- #
 
 
@@ -60,10 +63,10 @@ def create_foret():
     WCOLOR = foret
     BCOLOR = (50, 50, 50)
 
-    walls = []
+    case = []
     taille  # taille d’une case
 
-    return WCOLOR, BCOLOR, walls, taille
+    return WCOLOR, BCOLOR, case, taille
 # ------------------------------------------------------- #
 
 
@@ -75,10 +78,10 @@ def create_joueur_01():
     WCOLOR = joueur_01
     BCOLOR = (50, 50, 50)
 
-    walls = []
+    case = []
     taille  # taille d’une case
 
-    return WCOLOR, BCOLOR, walls, taille
+    return WCOLOR, BCOLOR, case, taille
 # ------------------------------------------------------- #
 
 # ----------------------- JOUEUR 02 --------------------- #
@@ -86,8 +89,9 @@ def create_joueur_02():
     WCOLOR = joueur_02
     BCOLOR = (50, 50, 50)
 
-    walls = []
+    case = []
     taille  # taille d’une case
 
-    return WCOLOR, BCOLOR, walls, taille
+    return WCOLOR, BCOLOR, case, taille
 # ------------------------------------------------------- #
+'''
