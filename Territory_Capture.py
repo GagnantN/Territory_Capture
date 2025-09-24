@@ -2,8 +2,6 @@ import pygame as pg, sys
 from fonctions.Map import create_map # AJOUT
 
 
-
-
 pg.init()
 
 
@@ -34,11 +32,36 @@ font_bouton = pg.font.SysFont("arial", 40)
 # ---------------------- BOUTONS ------------------------ #
 btn_jouer = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 200, 80)
 btn_quitter = pg.Rect(largeur//2 - 100, hauteur//2 + 60, 200, 80)
+btn_menu = pg.Rect(20, 20, 120, 50) # En haut à gauche      
 # ------------------------------------------------------- #
+
 
 clock = pg.time.Clock()
 
 
+# --------------- FONCTION AFFICHER MENU ---------------- #         #####
+def afficher_menu():
+    # Fond semi-transparent
+    menu_surface = pg.Surface((largeur, hauteur), pg.SRCALPHA)
+    menu_surface.fill((50, 50, 50, 200)) # Gris semi-transparent
+    screen.blit(menu_surface, (0,0))
+
+    # Bouton quitter vers menu principal
+    btn_quitter_jeu = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 200, 80)
+    pg.draw.rect(screen, ROUGE, btn_quitter_jeu, border_radius=15)
+    txt_quitter = font_bouton.render("Quitter", True, BLANC)
+    screen.blit(txt_quitter, (btn_quitter_jeu.centerx - txt_quitter.get_width()//2,
+                              btn_quitter_jeu.centery - txt_quitter.get_height()//2))
+    
+    # Petit bouton pour fermer le menu
+    btn_fermer_menu = pg.Rect(largeur - 140, 20, 120, 50) # Coin supérieur droit
+    pg.draw.rect(screen, BLEU, btn_fermer_menu, border_radius=10)
+    txt_fermer = font_bouton.render("Fermer", True, BLANC)
+    screen.blit(txt_fermer, (btn_fermer_menu.centerx - txt_fermer.get_width()//2,
+                                btn_fermer_menu.centery - txt_fermer.get_height()//2))
+
+    return btn_quitter_jeu, btn_fermer_menu
+# ------------------------------------------------------- #
 
 
 
@@ -86,6 +109,9 @@ def jeu():
     # Maps
     BCOLOR, case_original = create_map(screen)
     running = True
+    menu_actif = False
+    retour_menu = False # Revenir au menu principal
+    btn_menu = pg.Rect(20, 20, 120, 50)
 
     # Création de la map
     #WCOLOR, BCOLOR, walls = create_map(screen)
@@ -96,46 +122,68 @@ def jeu():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
-            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                running = False
 
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    menu_actif = not menu_actif
+
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if btn_menu.collidepoint(event.pos):
+                    menu_actif = True # Ouvrir le menu
+
+                if menu_actif :
+                    btn_quitter_jeu, btn_fermer_menu = afficher_menu()
+
+                    if event.type == pg.MOUSEBUTTONDOWN:
+                        if btn_quitter_jeu.collidepoint(event.pos):
+                            retour_menu = True
+                            running = False
+
+                        if btn_fermer_menu.collidepoint(event.pos):
+                            menu_actif = False # Fermer le menu
+
+                    if btn_quitter_jeu.collidepoint(event.pos):
+                        retour_menu = True
+                        running = False
+
+
+        # Dessin de l'écran de jeu
         screen.fill((24, 26, 32))
 
-    # Dessiner les cases de la map
+
+        # Dessiner les cases de la map
         for rect, couleur in case_original :
             pg.draw.rect(screen, couleur, rect)  # remplissage
             pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
 
-     # while running:
 
-#     dt = clock.tick(FPS) / 1000.0
+        # Bouton Menu en jeu
+        pg.draw.rect(screen, BLEU, btn_menu, border_radius=10)
+        txt_menu = font_bouton.render("Menu", True, BLANC)
+        screen.blit(txt_menu, (btn_menu.centerx - txt_menu.get_width()//2,
+                               btn_menu.centery - txt_menu.get_height()//2))
+        
 
-#     for e in pg.event.get():
-#         if e.type == pg.QUIT:
-#             running = False
-
-#         elif e.type == pg.MOUSEBUTTONDOWN:
-#             if button_rect.collidepoint(e.pos):
-#                 running = False # Quitter si clic sur le bouton
-
-#     screen.fill((24,26,32))
-#     pg.draw.rect(screen, button_color, button_rect)
-#     screen.blit(text_surface, (button_rect.x + 10, button_rect.y + 5))
-
-#     # Afficher la Map
-#     for rect, couleur in case_original :
-#         pg.draw.rect(screen, couleur, rect)  # remplissage
-#         pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
-
+        # Si menu actif, afficher overlay
+        if menu_actif:
+            btn_quitter_jeu = afficher_menu()
 
 
         pg.display.flip()
         clock.tick(60)
+
+    return retour_menu # Retourne l'etat pour savoir si on revint au menu principal 
 # ------------------------------------------------------- #
 
+
+
 # ------------------------ MAIN ------------------------- #
-page_accueil()
-jeu()
+while True:
+    page_accueil()
+    retour = jeu()
+
+    if not retour:
+        break # Si le joueur ferme complètement, on sort
 pg.quit()
 sys.exit()
 # ------------------------------------------------------- #
@@ -143,176 +191,3 @@ sys.exit()
 
 
 
-# # Créer map
-# from fonctions.Map import create_map
-# # Page d'accueil
-# from fonctions.menu_principal import page_accueil
-# # Buttons Quitter
-# from fonctions.boutons import button_rect, button_color, button_text_color, text_surface 
-
-
-
-
-# -------------------- CONFIGURATION -------------------- #
-
-# WIDTH, HEIGHT, FPS = 1500, 1000, 60
-
-
-# ------------------------------------------------------- #
-
-
-
-# ---------------------- MENU --------------------------- #
-# page_accueil(screen, largeur, hauteur)
-# # Quand le joueur clique sur "Jouer", on sort de la fonction et on continue ici
-# ------------------------------------------------------- #
-
-
-
-# --------------------- IMPORT -------------------------- #
-# # Maps
-# BCOLOR, case_original = create_map(screen)
-# # Buttons Quitter
-# from fonctions.boutons import button_rect, button_color, button_text_color, text_surface 
-# # ------------------------------------------------------- #
-
-
-
-# ------------------- BOUCLE JEU ------------------------ #
-# running = True
-# while running:
-#     dt = clock.tick(FPS) / 1000.0
-
-#     for e in pg.event.get():
-#         if e.type == pg.QUIT:
-#             running = False
-
-#         elif e.type == pg.MOUSEBUTTONDOWN:
-#             if button_rect.collidepoint(e.pos):
-#                 running = False # Quitter si clic sur le bouton
-
-#         elif e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
-#             running = False # Quitter avec Eshap
-
-
-#     # Fond
-#     screen.fill((24,26,32))
-
-#     # Boutton quitter
-#     pg.draw.rect(screen, button_color, button_rect, border_radius=10)
-#     screen.blit(text_surface, (button_rect.x + 10, button_rect.y + 5))
-
-#     # Afficher la Map
-#     for w in walls :
-#         pg.draw.rect(screen, WCOLOR, w)     # Mur plein
-#         pg.draw.rect(screen, BCOLOR, w, 1)  # Contour
-
-
-#     pg.display.flip()
-# ------------------------------------------------------- #
-
-# while running:
-
-#     dt = clock.tick(FPS) / 1000.0
-
-#     for e in pg.event.get():
-#         if e.type == pg.QUIT:
-#             running = False
-
-#         elif e.type == pg.MOUSEBUTTONDOWN:
-#             if button_rect.collidepoint(e.pos):
-#                 running = False # Quitter si clic sur le bouton
-
-#     screen.fill((24,26,32))
-#     pg.draw.rect(screen, button_color, button_rect)
-#     screen.blit(text_surface, (button_rect.x + 10, button_rect.y + 5))
-
-#     # Afficher la Map
-#     for rect, couleur in case_original :
-#         pg.draw.rect(screen, couleur, rect)  # remplissage
-#         pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
-
-
-#     pg.display.flip()
-
-
-# ----------------------- Quitter ----------------------- #
-# pg.quit(); 
-# sys.exit()
-
-
-
-
-
-
-
-
-
-
-
-
-
-# import sys
-
-# pg.init()
-
-
-
-# # ---------------- MENU ----------------
-# def page_accueil():
-#     en_cours = True
-#     while en_cours:
-#         for event in pg.event.get():
-#             if event.type == pg.QUIT:
-#                 pg.quit()
-#                 sys.exit()
-#             if event.type == pg.MOUSEBUTTONDOWN:
-#                 if btn_jouer.collidepoint(event.pos):
-#                     en_cours = False  # passer au jeu
-#                 if btn_quitter.collidepoint(event.pos):
-#                     pg.quit()
-#                     sys.exit()
-
-#         screen.fill(BLANC)
-
-#         # Titre
-#         titre = font_titre.render("Territory Capture", True, NOIR)
-#         screen.blit(titre, (largeur//2 - titre.get_width()//2, 100))
-
-#         # Bouton Jouer
-#         pg.draw.rect(screen, BLEU, btn_jouer, border_radius=15)
-#         txt_jouer = font_bouton.render("Jouer", True, BLANC)
-#         screen.blit(txt_jouer, (btn_jouer.centerx - txt_jouer.get_width()//2,
-#                                 btn_jouer.centery - txt_jouer.get_height()//2))
-
-#         # Bouton Quitter
-#         pg.draw.rect(screen, ROUGE, btn_quitter, border_radius=15)
-#         txt_quitter = font_bouton.render("Quitter", True, BLANC)
-#         screen.blit(txt_quitter, (btn_quitter.centerx - txt_quitter.get_width()//2,
-#                                   btn_quitter.centery - txt_quitter.get_height()//2))
-
-#         pg.display.flip()
-#         clock.tick(60)
-
-# # ---------------- JEU ----------------
-# def jeu():
-#     running = True
-#     while running:
-#         for event in pg.event.get():
-#             if event.type == pg.QUIT:
-#                 running = False
-#             if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-#                 running = False
-
-#         screen.fill((24, 26, 32))
-#         # Juste un carré de test
-#         pg.draw.rect(screen, BLEU, (largeur//2 - 50, hauteur//2 - 50, 100, 100))
-
-#         pg.display.flip()
-#         clock.tick(60)
-
-# # ---------------- MAIN ----------------
-# page_accueil()
-# jeu()
-# pg.quit()
-# sys.exit()
