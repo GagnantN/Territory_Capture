@@ -115,10 +115,21 @@ def page_accueil():
 # ------------------------ JEU -------------------------- #
 def jeu():
     # Maps
-    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data = create_map(screen)
+    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2 = create_map(screen)
+
 
     # Interface joueurs                                                 
     interface = affichage_joueurs(screen, joueur_01, joueur_02)
+
+    # Ajouter les points des zones de spawn pour le joueur 1
+    for ni, nj in spawn_zone_1:
+        interface.joueurs[1]["points"] += grid_points[ni][nj]
+
+    # Ajouter les points des zones de spawn pour le joueur 2
+    for ni, nj in spawn_zone_2:
+        interface.joueurs[2]["points"] += grid_points[ni][nj]
+
+
 
 
     running = True

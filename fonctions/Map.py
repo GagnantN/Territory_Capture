@@ -164,11 +164,12 @@ def create_map(screen):
                 return (i, j)
         return None
     
-    def expand_player_zone(grid, grid_owner, pos, color, owner_id):
+    def expand_player_zone(grid, grid_owner, pos, color, owner_id, grid_points):
         """Crée une zone 3x3 autour de la position du joueur."""
         if pos is None:
             return
         i, j = pos
+        captured_cells = []
         for di in (-1, 0, 1):
             for dj in (-1, 0, 1):
                 ni, nj = i + di, j + dj
@@ -177,15 +178,16 @@ def create_map(screen):
                     if grid[ni][nj] is None:
                         grid[ni][nj] = color
                         grid_owner[ni][nj] = owner_id
-
+                        captured_cells.append((ni, nj))
+        return captured_cells  # on retourne les cases de spawn
 
 
     pos_joueur_1 = place_player(joueur_01, 1, 18, 1, 3)
     pos_joueur_2 = place_player(joueur_02, 1, 18, 16, 18)
 
     # Étendre leur zone perso 3x3
-    expand_player_zone(grid, grid_owner, pos_joueur_1, joueur_01, 1)
-    expand_player_zone(grid, grid_owner, pos_joueur_2, joueur_02, 2)
+    spawn_zone_1 = expand_player_zone(grid, grid_owner, pos_joueur_1, joueur_01, 1, grid_points)
+    spawn_zone_2 = expand_player_zone(grid, grid_owner, pos_joueur_2, joueur_02, 2, grid_points)
 
     # Enregistrer les coordonnées de spawn pour vérifier les captures
     joueurs_data = {
@@ -209,7 +211,7 @@ def create_map(screen):
 
     print(f"Total cases créées : {len(case_original)}")
     # retourne aussi la taille utile pour dessiner les joueurs facilement
-    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data
+    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2
 
 
 
