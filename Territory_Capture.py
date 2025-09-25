@@ -108,7 +108,7 @@ def page_accueil():
 # ------------------------ JEU -------------------------- #
 def jeu():
     # Maps
-    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y = create_map(screen)
+    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points = create_map(screen)
 
     # Interface joueurs                                                 
     interface = affichage_joueurs(screen, joueur_01, joueur_02)
@@ -124,7 +124,7 @@ def jeu():
     joueur_actif = 1
     interface.joueurs[joueur_actif]["tickets"] += 2 # Premier joueur commence avec 2 tickets
     start_time = pg.time.get_ticks()
-    duree_tour = 5 #30 # Secondes
+    duree_tour = 5 #30 # Secondes                                       ############# Change initial 30
 
     # Création de la map
     #WCOLOR, BCOLOR, walls = create_map(screen)
@@ -160,7 +160,7 @@ def jeu():
                         running = False
                 
                 mouse_pos = pg.mouse.get_pos()
-                handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y) # Appel les joueurs
+                handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points) # Appel les joueurs
 
 
 

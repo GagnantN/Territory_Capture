@@ -31,6 +31,8 @@ def create_map(screen):
     grid = [[None for _ in range(colonne)] for _ in range(ligne)]
     # Ajoute une structure grid_owner parallèle à grid
     grid_owner = [[0 for _ in range(colonne)] for _ in range(ligne)]
+    # Ajoute une structure grid_owner parallèle à grid
+    grid_points = [[10 for _ in range(colonne)] for _ in range(ligne)]
 
 
     # helper : vérifier qu'une case candidate est libre et qu'elle n'a pas
@@ -110,6 +112,7 @@ def create_map(screen):
             ni, nj = ci + di, cj + dj
             if 0 <= ni < ligne and 0 <= nj < colonne:
                 grid[ni][nj] = central_color
+                grid_points[ni][nj] = 50
     print("[CENTER] 3x3 centrale placée")
 
     # ---------------------------
@@ -200,55 +203,56 @@ def create_map(screen):
 
     print(f"Total cases créées : {len(case_original)}")
     # retourne aussi la taille utile pour dessiner les joueurs facilement
-    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y
+    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points
 
 
 
 
-def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x, offset_y):
+def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x, offset_y, grid_points):
     """
     mouse_pos: position du clic
     case_original: liste [(rect, couleur, owner)]
     joueur_id: 1 ou 2
-    joueurs: ton dict interface.joueurs (pour accéder aux tickets)
+    joueurs: dict interface.joueurs
+    grid_points: grille contenant la valeur en points de chaque case
     """
 
     if joueurs[joueur_id]["tickets"] <= 0:
         return False  # pas de ticket -> rien
 
+    largeur = int(len(grid_points))  # Taille d'une ligne = 21
     for idx, (rect, couleur, owner) in enumerate(case_original):
         if rect.collidepoint(mouse_pos):
 
-            # 1) Vérifie si la case est un terrain (couleur dans terrains.values())
+            # --- Convertir index en (i, j) ---
+            i, j = divmod(idx, largeur)
+
+            # 1) Vérifie si la case est un terrain ou deja capturer par le même joueur → capture interdite
             if couleur in terrains.values():
-                # → Terrain, capture interdite
                 return False
 
-            # 2) Vérifie si la case est vide OU appartient à un joueur adverse
-            # owner == 0 → libre
-            # owner == joueur_id → déjà ta propre case, donc inutile
-            if owner == joueur_id:
-                return False  # On ne recapture pas sa propre case
-
-            # 3) Vérifie si adjacent à ta zone
+            # 2) Vérifie si adjacent à une case du joueur
             if not est_adjacent(case_original, idx, joueur_id, taille, offset_x, offset_y):
                 return False
 
-            # 4) Détermine les points à donner
-            if couleur == central_color:  # zone orange ou ville
-                points_gagnes = 50
-            else:
-                points_gagnes = 10
+            # 3) Gestion capture d'une case adverse
+            if owner != 0 and owner != joueur_id:
+                # Retirer les points à l'ancien propriétaire
+                joueurs[owner]["points"] -= grid_points[i][j]
+                if joueurs[owner]["points"] < 0:
+                    joueurs[owner]["points"] = 0  # Sécurité pour éviter des points négatifs
 
-            # 5) Capture la case
+            # 4) Capturer la case
             new_color = joueurs[joueur_id]["color"]
             case_original[idx] = (rect, new_color, joueur_id)
+
             joueurs[joueur_id]["tickets"] -= 1
-            joueurs[joueur_id]["points"] += points_gagnes
+            joueurs[joueur_id]["points"] += grid_points[i][j]
 
             return True
 
     return False  # aucun clic valide
+
 
 
 
