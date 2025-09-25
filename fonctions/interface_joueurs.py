@@ -29,29 +29,44 @@ class affichage_joueurs:
 
 
     # -------------------- AFFICHAGE ------------------------ #
-    def draw(self):
+    def draw(self, joueur_actif=None):                              #####
         # Affiche le menu à gauche et à droite de l'écran
         WIDTH, HEIGHT = self.screen.get_size()
 
-        # Joueur 1 (gauche)
-        self._draw_joueur(
-            x=20,
-            joueur=self.joueurs[1]
-        )
+        # # Joueur 1 (gauche)
+        # self._draw_joueur(
+        #     x=20,
+        #     joueur=self.joueurs[1]
+        # )
 
-        # Joueur 2 (droite)
-        self._draw_joueur(
-            x=WIDTH - 200, # Décalé sur la droite
-            joueur=self.joueurs[2]
-        )
+        # Joueur 1                                                  #####
+        self._draw_joueur(20, self.joueurs[1], actif=(joueur_actif == 1))
+
+        # Joueur 2                                                  #####
+        self._draw_joueur(WIDTH - 200, self.joueurs[2], actif=(joueur_actif == 2))
+
+        # # Joueur 2 (droite)
+        # self._draw_joueur(
+        #     x=WIDTH - 200, # Décalé sur la droite
+        #     joueur=self.joueurs[2]
+        # )
 
 
-    def _draw_joueur(self, x, joueur):
+
+    def _draw_joueur(self, x, joueur, actif=False):                 #####
         # Affiche les infos d'un joueur
         y = 100 # Marge haut
-        titre = self.font.render(joueur["nom"], True, joueur["color"])
+
+        # Si joueur actif : couleur spéciale                        #####
+        color_nom = (255, 255, 0) if actif else joueur["color"]
+
+        titre = self.font.render(joueur["nom"], True, color_nom)    #####
         points = self.font.render(f"Points: {joueur['points']}", True, (255, 255, 255))
         tickets = self.font.render(f"Tickets: {joueur['tickets']}", True, (255, 255, 255))
+
+        # Si actif : encadré autour
+        if actif:
+            pg.draw.rect(self.screen, (255, 215, 0), (x-10, y-10, 180, 120), 3, border_radius=8)
 
         self.screen.blit(titre, (x, y))
         self.screen.blit(points, (x, y + 40))

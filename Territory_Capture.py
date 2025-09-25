@@ -118,17 +118,17 @@ def jeu():
     btn_menu = pg.Rect(20, 20, 120, 50)
 
 
-    # Compteur de tours                                                 
-    tour = 0
+    # Compteur de tours                                                 #####
+    joueur_actif = 1
+    interface.joueurs[joueur_actif]["tickets"] += 2 # Premier joueur commence avec 2 tickets
+    start_time = pg.time.get_ticks()
+    duree_tour = 30 # Secondes
 
     # Création de la map
     #WCOLOR, BCOLOR, walls = create_map(screen)
 
     while running:
         dt = clock.tick(60) / 1000.0
-        tour +=1
-        if tour % 120 == 0: # Toutes les 2 secondes à 60 FPS
-            interface.update_tickets()
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -158,6 +158,16 @@ def jeu():
                         running = False
 
 
+        # Vérifier si 30 secondes écoulées                  #####
+        elapsed = (pg.time.get_ticks() - start_time) / 1000
+        chrono = max(0, duree_tour - int(elapsed))
+        if elapsed >= duree_tour:
+            # Changer de joueur
+            joueur_actif = 2 if joueur_actif == 1 else 1
+            interface.joueurs[joueur_actif]["tickets"] +=2
+            start_time = pg.time.get_ticks() # Reset chronomètre
+
+
         # Affichage jeu
         screen.fill((24, 26, 32))
 
@@ -167,12 +177,14 @@ def jeu():
             pg.draw.rect(screen, couleur, rect)  # remplissage
             pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
             
+
         # Dessiner les joueurs
         if pos_joueur_1:
             i, j = pos_joueur_1
             x = int(largeur * 0.25) + j * (taille)
             y = int(hauteur * 0.1) + i * (taille)
             pg.draw.rect(screen, (70, 130, 180), (x, y, taille, taille))  # joueur_01
+
 
         if pos_joueur_2:
             i, j = pos_joueur_2
@@ -181,8 +193,15 @@ def jeu():
             pg.draw.rect(screen, (178, 34, 3), (x, y, taille, taille))  # joueur_02
 
 
-        # HUD des joueurs
-        interface.draw()
+        # HUD des joueurs                   #####
+        interface.draw(joueur_actif)
+
+
+        # Afficher chrono en haut           #####
+        font_timer = pg.font.SysFont("arial", 48, bold=True)
+        txt_timer = font_timer.render(str(chrono), True, (255, 255, 0))
+        screen.blit(txt_timer, (largeur // 2 - txt_timer.get_width() // 2, 20))
+
 
         # Bouton Menu en jeu
         pg.draw.rect(screen, BLEU, btn_menu, border_radius=10)
@@ -197,7 +216,7 @@ def jeu():
 
 
         pg.display.flip()
-        clock.tick(60)
+        # clock.tick(60)                    #####
 
     return retour_menu # Retourne l'etat pour savoir si on revint au menu principal 
 # ------------------------------------------------------- #
