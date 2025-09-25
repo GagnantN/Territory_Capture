@@ -1,5 +1,5 @@
 import pygame as pg, sys
-from fonctions.Map import create_map, joueur_01, joueur_02, handle_click # AJOUT
+from fonctions.Map import create_map, joueur_01, joueur_02, handle_click, afficher_victoire # AJOUT
 from fonctions.interface_joueurs import affichage_joueurs
 
 
@@ -115,7 +115,7 @@ def page_accueil():
 # ------------------------ JEU -------------------------- #
 def jeu():
     # Maps
-    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points = create_map(screen)
+    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data = create_map(screen)
 
     # Interface joueurs                                                 
     interface = affichage_joueurs(screen, joueur_01, joueur_02)
@@ -179,16 +179,20 @@ def jeu():
 
                     # Clic sur map
                     mouse_pos = pg.mouse.get_pos()
-                    handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points) # Appel les joueurs
+                    handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points, joueurs_data) # Appel les joueurs
+                    
+                    resultat = handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points, joueurs_data)
+
+                    # Si la fonction retourne une victoire
+                    if isinstance(resultat, tuple) and resultat[0] == "VICTOIRE":
+                        gagnant = joueur_actif
+                        afficher_victoire(screen, gagnant, largeur, hauteur)
+                        return True  # Retourne au menu principal
 
 
                 if btn_menu.collidepoint(event.pos):
                     menu_actif = True
                     chrono_en_pause = chrono
-
-                
-
-
 
         # Chrono
         if not menu_actif:                                      #####

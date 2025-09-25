@@ -160,7 +160,7 @@ def create_map(screen):
                     break
             if ok:
                 grid[i][j] = color
-                grid_owner[i][j] = i if color == joueur_01 else 2
+                grid_owner[i][j] = 1 if color == joueur_01 else 2
                 return (i, j)
         return None
     
@@ -186,6 +186,12 @@ def create_map(screen):
     # Étendre leur zone perso 3x3
     expand_player_zone(grid, grid_owner, pos_joueur_1, joueur_01, 1)
     expand_player_zone(grid, grid_owner, pos_joueur_2, joueur_02, 2)
+
+    # Enregistrer les coordonnées de spawn pour vérifier les captures
+    joueurs_data = {
+        1: {"spawn": pos_joueur_1},
+        2: {"spawn": pos_joueur_2}
+    }
     print(f"Players placed: {pos_joueur_1}, {pos_joueur_2}")
 
 
@@ -203,20 +209,15 @@ def create_map(screen):
 
     print(f"Total cases créées : {len(case_original)}")
     # retourne aussi la taille utile pour dessiner les joueurs facilement
-    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points
+    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data
 
 
 
 
-def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x, offset_y, grid_points):
+def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x, offset_y, grid_points, joueurs_data):
     """
-    mouse_pos: position du clic
-    case_original: liste [(rect, couleur, owner)]
-    joueur_id: 1 ou 2
-    joueurs: dict interface.joueurs
-    grid_points: grille contenant la valeur en points de chaque case
+    Gère le clic sur la carte.
     """
-
     if joueurs[joueur_id]["tickets"] <= 0:
         return False  # pas de ticket -> rien
 
@@ -224,11 +225,11 @@ def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x,
     for idx, (rect, couleur, owner) in enumerate(case_original):
         if rect.collidepoint(mouse_pos):
 
-            # --- Convertir index en (i, j) ---
+            # Convertir index en coordonnées (i, j)
             i, j = divmod(idx, largeur)
 
-            # 1) Vérifie si la case est un terrain ou deja capturer par le même joueur → capture interdite
-            if couleur in terrains.values():
+            # 1) Vérifie si c'est un terrain, la propre zone du joueur, ou son propre spawn → interdit
+            if couleur in terrains.values() or owner == joueur_id or (i, j) == joueurs_data[joueur_id]["spawn"]:
                 return False
 
             # 2) Vérifie si adjacent à une case du joueur
@@ -237,10 +238,15 @@ def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x,
 
             # 3) Gestion capture d'une case adverse
             if owner != 0 and owner != joueur_id:
-                # Retirer les points à l'ancien propriétaire
-                joueurs[owner]["points"] -= grid_points[i][j]
-                if joueurs[owner]["points"] < 0:
-                    joueurs[owner]["points"] = 0  # Sécurité pour éviter des points négatifs
+                # Capture d'un spawn adverse → victoire
+                if (i, j) == joueurs_data[owner]["spawn"]:
+                    return "VICTOIRE", owner
+
+                # Sinon, retirer les points normalement
+                if owner in joueurs:
+                    joueurs[owner]["points"] -= grid_points[i][j]
+                    if joueurs[owner]["points"] < 0:
+                        joueurs[owner]["points"] = 0  # éviter négatif
 
             # 4) Capturer la case
             new_color = joueurs[joueur_id]["color"]
@@ -251,9 +257,7 @@ def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x,
 
             return True
 
-    return False  # aucun clic valide
-
-
+    return False  # Aucun clic valide
 
 
 def est_adjacent(case_original, idx, joueur_id, taille, offset_x, offset_y):
@@ -269,3 +273,27 @@ def est_adjacent(case_original, idx, joueur_id, taille, offset_x, offset_y):
             if owner == joueur_id:
                 return True
     return False
+
+def afficher_victoire(screen, gagnant, largeur, hauteur):
+    font = pg.font.SysFont("arial", 72, bold=True)
+    petit_font = pg.font.SysFont("arial", 40)
+
+    message = f"Le joueur {gagnant} a gagné la partie !"
+    texte = font.render(message, True, (255, 255, 0))
+
+    sous_texte = petit_font.render("Cliquez pour continuer", True, (255, 255, 255))
+
+    overlay = pg.Surface((largeur, hauteur), pg.SRCALPHA)
+    overlay.fill((0, 0, 0, 180))  # fond semi-transparent
+    screen.blit(overlay, (0, 0))
+    screen.blit(texte, (largeur//2 - texte.get_width()//2, hauteur//2 - texte.get_height()//2))
+    screen.blit(sous_texte, (largeur//2 - sous_texte.get_width()//2, hauteur//2 + 80))
+
+    pg.display.flip()
+
+    # Attente blocante
+    attente = True
+    while attente:
+        for event in pg.event.get():
+            if event.type in (pg.QUIT, pg.MOUSEBUTTONDOWN, pg.KEYDOWN):
+                attente = False
