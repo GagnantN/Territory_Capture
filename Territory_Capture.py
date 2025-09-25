@@ -1,6 +1,8 @@
 import pygame as pg, sys
-from fonctions.Map import create_map, joueur_01, joueur_02 # AJOUT
+from fonctions.Map import create_map, joueur_01, joueur_02, handle_click # AJOUT
 from fonctions.interface_joueurs import affichage_joueurs
+
+
 
 
 pg.init()
@@ -106,7 +108,7 @@ def page_accueil():
 # ------------------------ JEU -------------------------- #
 def jeu():
     # Maps
-    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille = create_map(screen)
+    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y = create_map(screen)
 
     # Interface joueurs                                                 
     interface = affichage_joueurs(screen, joueur_01, joueur_02)
@@ -156,6 +158,9 @@ def jeu():
                     if btn_quitter_jeu.collidepoint(event.pos):
                         retour_menu = True
                         running = False
+                
+                mouse_pos = pg.mouse.get_pos()
+                handle_click(mouse_pos, case_original, joueur_01)  # par ex. joueur 1
 
 
         # Affichage jeu
@@ -170,14 +175,14 @@ def jeu():
         # Dessiner les joueurs
         if pos_joueur_1:
             i, j = pos_joueur_1
-            x = int(largeur * 0.25) + j * (taille)
-            y = int(hauteur * 0.1) + i * (taille)
+            x = offset_x + j * (taille)
+            y = offset_y + i * (taille)
             pg.draw.rect(screen, (70, 130, 180), (x, y, taille, taille))  # joueur_01
 
         if pos_joueur_2:
             i, j = pos_joueur_2
-            x = int(largeur * 0.25) + j * taille
-            y = int(hauteur * 0.1) + i * taille
+            x = offset_x + j * taille
+            y = offset_y + i * taille
             pg.draw.rect(screen, (178, 34, 3), (x, y, taille, taille))  # joueur_02
 
 

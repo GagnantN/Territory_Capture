@@ -16,8 +16,14 @@ def create_map(screen):
     WIDTH, HEIGHT = screen.get_size()
     BCOLOR = (50, 50, 50)
 
-    ligne, colonne = 20, 20
+    ligne, colonne = 21, 21
     taille = min(WIDTH // (colonne + 5), HEIGHT // (ligne + 5))
+    # calcule les marges pour centrer la grille
+    total_width = colonne * taille
+    total_height = ligne * taille
+    offset_x = (WIDTH - total_width) // 2
+    offset_y = (HEIGHT - total_height) // 2
+
 
     # grille logique : None ou couleur (tuple)
     grid = [[None for _ in range(colonne)] for _ in range(ligne)]
@@ -180,12 +186,23 @@ def create_map(screen):
     case_original = []
     for i in range(ligne):
         for j in range(colonne):
-            x = int(WIDTH * 0.25) + j * taille
-            y = int(HEIGHT * 0.1) + i * taille
+            x = offset_x + j * taille
+            y = offset_y + i * taille
             rect = pg.Rect(x, y, taille, taille)
             couleur = grid[i][j] if grid[i][j] is not None else (191, 183, 161)
             case_original.append((rect, couleur))
 
     print(f"Total cases créées : {len(case_original)}")
     # retourne aussi la taille utile pour dessiner les joueurs facilement
-    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille
+    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y
+
+
+def handle_click(mouse_pos, case_original, player_color):
+    """
+    Vérifie si une case a été cliquée et la colore avec player_color.
+    """
+    for idx, (rect, couleur) in enumerate(case_original):
+        if rect.collidepoint(mouse_pos):
+            case_original[idx] = (rect, player_color)
+            return idx  # retourne l'index modifié
+    return None  # rien n'a été cliqué
