@@ -3,9 +3,14 @@ import pygame as pg
 import random
 from fonctions.cases import terrains
 
-# couleurs joueurs (tu peux les garder dans cases.py si tu préfères)
-joueur_01 = (70, 130, 180)
-joueur_02 = (178, 34, 3)
+
+
+# ----------------- COULEUR JOUEURS -------------------- #
+joueur_01 = (70, 130, 180)   # Bleu acier
+joueur_02 = (178, 34, 3)     # Rouge brique
+# ------------------------------------------------------- #
+
+
 
 def create_map(screen):
     WIDTH, HEIGHT = screen.get_size()

@@ -1,9 +1,10 @@
 import pygame as pg, sys
-from fonctions.Map import create_map # AJOUT
+from fonctions.Map import create_map, joueur_01, joueur_02 # AJOUT
+from fonctions.interface_joueurs import affichage_joueurs
 
 
 pg.init()
-
+clock = pg.time.Clock()
 
 # ------------------------ ECRAN ------------------------ #
 screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
@@ -36,10 +37,8 @@ btn_menu = pg.Rect(20, 20, 120, 50) # En haut à gauche
 # ------------------------------------------------------- #
 
 
-clock = pg.time.Clock()
 
-
-# --------------- FONCTION AFFICHER MENU ---------------- #         #####
+# --------------- FONCTION AFFICHER MENU ---------------- #
 def afficher_menu():
     # Fond semi-transparent
     menu_surface = pg.Surface((largeur, hauteur), pg.SRCALPHA)
@@ -108,16 +107,28 @@ def page_accueil():
 def jeu():
     # Maps
     BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille = create_map(screen)
+
+    # Interface joueurs                                                 
+    interface = affichage_joueurs(screen, joueur_01, joueur_02)
+
+
     running = True
     menu_actif = False
     retour_menu = False # Revenir au menu principal
     btn_menu = pg.Rect(20, 20, 120, 50)
+
+
+    # Compteur de tours                                                 
+    tour = 0
 
     # Création de la map
     #WCOLOR, BCOLOR, walls = create_map(screen)
 
     while running:
         dt = clock.tick(60) / 1000.0
+        tour +=1
+        if tour % 120 == 0: # Toutes les 2 secondes à 60 FPS
+            interface.update_tickets()
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -147,7 +158,7 @@ def jeu():
                         running = False
 
 
-        # Dessin de l'écran de jeu
+        # Affichage jeu
         screen.fill((24, 26, 32))
 
 
@@ -170,6 +181,8 @@ def jeu():
             pg.draw.rect(screen, (178, 34, 3), (x, y, taille, taille))  # joueur_02
 
 
+        # HUD des joueurs
+        interface.draw()
 
         # Bouton Menu en jeu
         pg.draw.rect(screen, BLEU, btn_menu, border_radius=10)
