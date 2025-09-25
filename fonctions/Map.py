@@ -81,9 +81,10 @@ def create_map(screen):
                 grid[x][y] = None
 
         return False
+    
 
     # ---------------------------
-    # 1) placer la zone centrale 3x3 (orange)
+    # 1) placer la zone centrale 3x3 (orange) et les joueurs 3x3 (bleu et rouge)
     # ---------------------------
     central_color = (255, 165, 0)  # orange
     ci = ligne // 2
@@ -119,9 +120,10 @@ def create_map(screen):
     # ---------------------------
     # 3) placer joueurs : chercher une case vraiment vide (et séparée)
     # ---------------------------
-    def place_player(color, min_col, max_col):
+    # Génére une zone autour des joueurs
+    def place_player(color, min_lin, max_lin, min_col, max_col):
         for _ in range(1000):
-            i = random.randrange(ligne)
+            i = random.randrange(min_lin, max_lin)
             j = random.randint(min_col, max_col)
             # ici on veut une case ayant aucun voisin occupé (safe spawn)
             if not (0 <= i < ligne and 0 <= j < colonne):
@@ -142,10 +144,30 @@ def create_map(screen):
                 grid[i][j] = color
                 return (i, j)
         return None
+    
+    def expand_player_zone(grid, pos, color):
+        """Crée une zone 3x3 autour de la position du joueur."""
+        if pos is None:
+            return
+        i, j = pos
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                ni, nj = i + di, j + dj
+                if 0 <= ni < len(grid) and 0 <= nj < len(grid[0]):
+                    # On écrase seulement si la case est vide (None)
+                    if grid[ni][nj] is None:
+                        grid[ni][nj] = color
 
-    pos_joueur_1 = place_player(joueur_01, 0, 4)
-    pos_joueur_2 = place_player(joueur_02, 15, 19)
+
+
+    pos_joueur_1 = place_player(joueur_01, 1, 18, 1, 3)
+    pos_joueur_2 = place_player(joueur_02, 1, 18, 16, 18)
+
+    # Étendre leur zone perso 3x3
+    expand_player_zone(grid, pos_joueur_1, joueur_01)
+    expand_player_zone(grid, pos_joueur_2, joueur_02)
     print(f"Players placed: {pos_joueur_1}, {pos_joueur_2}")
+
 
     # ---------------------------
     # 4) convertir en liste de rects + couleurs
