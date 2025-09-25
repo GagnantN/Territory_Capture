@@ -3,14 +3,13 @@ from fonctions.Map import create_map, joueur_01, joueur_02, handle_click # AJOUT
 from fonctions.interface_joueurs import affichage_joueurs
 
 
-
-
 pg.init()
 clock = pg.time.Clock()
 
+
 # ------------------------ ECRAN ------------------------ #
 screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
-largeur, hauteur = screen.get_size() # récupère la résolution réelle
+largeur, hauteur = screen.get_size()
 pg.display.set_caption("Territory Capture")
 # ------------------------------------------------------- #
 
@@ -28,14 +27,20 @@ ROUGE = (200, 50, 50)
 # ----------------------- POLICE ------------------------ #
 font_titre = pg.font.SysFont("arial", 60, bold=True)
 font_bouton = pg.font.SysFont("arial", 40)
+font_timer = pg.font.SysFont("arial", 48, bold=True)
 # ------------------------------------------------------- #
 
 
 
 # ---------------------- BOUTONS ------------------------ #
+# Bouton jouer
 btn_jouer = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 200, 80)
+# Bouton quitter
 btn_quitter = pg.Rect(largeur//2 - 100, hauteur//2 + 60, 200, 80)
-btn_menu = pg.Rect(20, 20, 120, 50) # En haut à gauche      
+# Bouton menu
+btn_menu = pg.Rect(20, 20, 120, 50)
+# Bouton skip partie
+btn_skip = pg.Rect(largeur//2 - 150, hauteur - 100, 300, 60)
 # ------------------------------------------------------- #
 
 
@@ -48,7 +53,7 @@ def afficher_menu():
     screen.blit(menu_surface, (0,0))
 
     # Bouton quitter vers menu principal
-    btn_quitter_jeu = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 300, 80)
+    btn_quitter_jeu = pg.Rect(largeur//2 - 150, hauteur//2 - 40, 300, 80)
     pg.draw.rect(screen, ROUGE, btn_quitter_jeu, border_radius=15)
     txt_quitter = font_bouton.render("Retour au menu", True, BLANC)
     screen.blit(txt_quitter, (btn_quitter_jeu.centerx - txt_quitter.get_width()//2,
@@ -74,9 +79,11 @@ def page_accueil():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
+
             if event.type == pg.MOUSEBUTTONDOWN:
                 if btn_jouer.collidepoint(event.pos):
                     en_cours = False  # passer au jeu
+                    
                 if btn_quitter.collidepoint(event.pos):
                     pg.quit()
                     sys.exit()
@@ -117,17 +124,19 @@ def jeu():
     running = True
     menu_actif = False
     retour_menu = False # Revenir au menu principal
-    btn_menu = pg.Rect(20, 20, 120, 50)
-
-
-    # Compteur de tours                                                 #####
     joueur_actif = 1
     interface.joueurs[joueur_actif]["tickets"] += 2 # Premier joueur commence avec 2 tickets
     start_time = pg.time.get_ticks()
     duree_tour = 30 # Secondes
+    chrono = duree_tour # Initialise le chrono
+    chrono_en_pause = chrono
+
+    btn_quitter_jeu, btn_fermer_menu = None, None
+
 
     # Création de la map
     #WCOLOR, BCOLOR, walls = create_map(screen)
+
 
     while running:
         dt = clock.tick(60) / 1000.0
@@ -136,41 +145,54 @@ def jeu():
             if event.type == pg.QUIT:
                 running = False
 
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE:
-                    menu_actif = not menu_actif
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:       ###
+                menu_actif = not menu_actif
+                if menu_actif:
+                    chrono_en_pause = chrono # Figer le chrono
+                else:
+                    # Reprendre le chrono correctement
+                    start_time = pg.time.get_ticks() - (duree_tour - chrono_en_pause) * 1000
 
             if event.type == pg.MOUSEBUTTONDOWN:
-                if btn_menu.collidepoint(event.pos):
-                    menu_actif = True # Ouvrir le menu
-
-                if menu_actif :
-                    btn_quitter_jeu, btn_fermer_menu = afficher_menu()
-
-                    if event.type == pg.MOUSEBUTTONDOWN:
-                        if btn_quitter_jeu.collidepoint(event.pos):
-                            retour_menu = True
-                            running = False
-
-                        if btn_fermer_menu.collidepoint(event.pos):
-                            menu_actif = False # Fermer le menu
-
-                    if btn_quitter_jeu.collidepoint(event.pos):
+                if menu_actif:
+                    if btn_quitter_jeu and btn_quitter_jeu.collidepoint(event.pos):
                         retour_menu = True
                         running = False
+                    if btn_fermer_menu and btn_fermer_menu.collidepoint(event.pos):
+                        menu_actif = False
                 
-                mouse_pos = pg.mouse.get_pos()
-                handle_click(mouse_pos, case_original, joueur_01)  # par ex. joueur 1
+                else: 
+                    # Skip tour
+                    if btn_skip.collidepoint(event.pos):
+                        joueur_actif = 2 if joueur_actif == 1 else 1
+                        interface.joueurs[joueur_actif]["tickets"] += 2
+                        start_time = pg.time.get_ticks()
+                        chrono = duree_tour # Reset chrono
 
 
-        # Vérifier si 30 secondes écoulées                  #####
-        elapsed = (pg.time.get_ticks() - start_time) / 1000
-        chrono = max(0, duree_tour - int(elapsed))
-        if elapsed >= duree_tour:
-            # Changer de joueur
-            joueur_actif = 2 if joueur_actif == 1 else 1
-            interface.joueurs[joueur_actif]["tickets"] +=2
-            start_time = pg.time.get_ticks() # Reset chronomètre
+                    # Clic sur map
+                    handle_click(pg.mouse.get_pos(), case_original, joueur_02)
+
+
+                if btn_menu.collidepoint(event.pos):
+                    menu_actif = True
+                    chrono_en_pause = chrono
+
+
+        # Chrono
+        if not menu_actif:                                      #####
+            # Vérifier si 30 secondes écoulées
+            elapsed = (pg.time.get_ticks() - start_time) / 1000
+            chrono = max(0, duree_tour - int(elapsed))
+            if elapsed >= duree_tour:
+                # Changer de joueur
+                joueur_actif = 2 if joueur_actif == 1 else 1
+                interface.joueurs[joueur_actif]["tickets"] +=2
+                start_time = pg.time.get_ticks() # Reset chronomètre
+
+        else:
+            # Chrono figé
+            chrono = chrono_en_pause # Figé
 
 
         # Affichage jeu
@@ -186,26 +208,25 @@ def jeu():
         # Dessiner les joueurs
         if pos_joueur_1:
             i, j = pos_joueur_1
-            x = offset_x + j * (taille)
-            y = offset_y + i * (taille)
-            pg.draw.rect(screen, (70, 130, 180), (x, y, taille, taille))  # joueur_01
+            # x = offset_x + j * (taille)
+            # y = offset_y + i * (taille)
+            pg.draw.rect(screen, (70, 130, 180), (offset_x + j*taille, offset_y + i*taille, taille, taille))  # joueur_01
 
 
         if pos_joueur_2:
             i, j = pos_joueur_2
-            x = offset_x + j * taille
-            y = offset_y + i * taille
-            pg.draw.rect(screen, (178, 34, 3), (x, y, taille, taille))  # joueur_02
+            # x = offset_x + j * taille
+            # y = offset_y + i * taille
+            pg.draw.rect(screen, (178, 34, 3), (offset_x + j*taille, offset_y + i*taille, taille, taille))  # joueur_02
 
 
-        # HUD des joueurs                   #####
+        # HUD des joueurs
         interface.draw(joueur_actif)
 
 
-        # Afficher chrono en haut           #####
-        font_timer = pg.font.SysFont("arial", 48, bold=True)
-        txt_timer = font_timer.render(str(chrono), True, (255, 255, 0))
-        screen.blit(txt_timer, (largeur // 2 - txt_timer.get_width() // 2, 20))
+        # Chrono
+        txt_timer = pg.font.SysFont("arial",48,bold=True).render(str(chrono), True, (255, 255, 0))
+        screen.blit(txt_timer, (largeur//2 - txt_timer.get_width()//2, 20))
 
 
         # Bouton Menu en jeu
@@ -215,13 +236,22 @@ def jeu():
                                btn_menu.centery - txt_menu.get_height()//2))
         
 
-        # Si menu actif, afficher overlay
-        if menu_actif:
-            btn_quitter_jeu = afficher_menu()
 
+        # Bouton Skip (Uniquement si menu non actif)
+        if not menu_actif:
+            pg.draw.rect(screen, (24, 26, 32), btn_skip)
+            pg.draw.rect(screen, (255, 255, 0), btn_skip, width=3, border_radius=12)
+            txt_skip = font_bouton.render("Passer le tour", True, (255, 255, 0))
+            screen.blit(txt_skip, (btn_skip.centerx - txt_skip.get_width()//2,
+                                btn_skip.centery - txt_skip.get_height()//2))
+
+
+        # Overlay menu
+        if menu_actif:
+            # btn_quitter_jeu = afficher_menu()
+            btn_quitter_jeu, btn_fermer_menu = afficher_menu()
 
         pg.display.flip()
-        # clock.tick(60)                    #####
 
     return retour_menu # Retourne l'etat pour savoir si on revint au menu principal 
 # ------------------------------------------------------- #
@@ -235,6 +265,7 @@ while True:
 
     if not retour:
         break # Si le joueur ferme complètement, on sort
+
 pg.quit()
 sys.exit()
 # ------------------------------------------------------- #
