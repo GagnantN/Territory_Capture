@@ -160,7 +160,8 @@ def jeu():
                         running = False
                 
                 mouse_pos = pg.mouse.get_pos()
-                handle_click(mouse_pos, case_original, joueur_01)  # par ex. joueur 1
+                handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y) # Appel les joueurs
+
 
 
         # Vérifier si 30 secondes écoulées                  #####
@@ -178,7 +179,7 @@ def jeu():
 
 
         # Dessiner les cases de la map
-        for rect, couleur in case_original :
+        for rect, couleur, owner in case_original :
             pg.draw.rect(screen, couleur, rect)  # remplissage
             pg.draw.rect(screen, BCOLOR, rect, 1) # bordure
             

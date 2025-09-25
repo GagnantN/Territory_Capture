@@ -27,6 +27,9 @@ def create_map(screen):
 
     # grille logique : None ou couleur (tuple)
     grid = [[None for _ in range(colonne)] for _ in range(ligne)]
+    # Ajoute une structure grid_owner parallèle à grid
+    grid_owner = [[0 for _ in range(colonne)] for _ in range(ligne)]
+
 
     # helper : vérifier qu'une case candidate est libre et qu'elle n'a pas
     # de voisin d'une couleur différente (pour garantir l'espace d'une case)
@@ -153,10 +156,11 @@ def create_map(screen):
                     break
             if ok:
                 grid[i][j] = color
+                grid_owner[i][j] = i if color == joueur_01 else 2
                 return (i, j)
         return None
     
-    def expand_player_zone(grid, pos, color):
+    def expand_player_zone(grid, grid_owner, pos, color, owner_id):
         """Crée une zone 3x3 autour de la position du joueur."""
         if pos is None:
             return
@@ -168,6 +172,7 @@ def create_map(screen):
                     # On écrase seulement si la case est vide (None)
                     if grid[ni][nj] is None:
                         grid[ni][nj] = color
+                        grid_owner[ni][nj] = owner_id
 
 
 
@@ -175,8 +180,8 @@ def create_map(screen):
     pos_joueur_2 = place_player(joueur_02, 1, 18, 16, 18)
 
     # Étendre leur zone perso 3x3
-    expand_player_zone(grid, pos_joueur_1, joueur_01)
-    expand_player_zone(grid, pos_joueur_2, joueur_02)
+    expand_player_zone(grid, grid_owner, pos_joueur_1, joueur_01, 1)
+    expand_player_zone(grid, grid_owner, pos_joueur_2, joueur_02, 2)
     print(f"Players placed: {pos_joueur_1}, {pos_joueur_2}")
 
 
@@ -190,19 +195,55 @@ def create_map(screen):
             y = offset_y + i * taille
             rect = pg.Rect(x, y, taille, taille)
             couleur = grid[i][j] if grid[i][j] is not None else (191, 183, 161)
-            case_original.append((rect, couleur))
+            case_original.append((rect, couleur, grid_owner[i][j]))
 
     print(f"Total cases créées : {len(case_original)}")
     # retourne aussi la taille utile pour dessiner les joueurs facilement
     return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y
 
 
-def handle_click(mouse_pos, case_original, player_color):
+
+
+def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x, offset_y):
     """
-    Vérifie si une case a été cliquée et la colore avec player_color.
+    mouse_pos: position du clic
+    case_original: liste [(rect, couleur, owner)]
+    joueur_id: 1 ou 2
+    joueurs: ton dict interface.joueurs (pour accéder aux tickets)
     """
-    for idx, (rect, couleur) in enumerate(case_original):
+
+    if joueurs[joueur_id]["tickets"] <= 0:
+        return False  # pas de ticket -> rien
+
+    for idx, (rect, couleur, owner) in enumerate(case_original):
         if rect.collidepoint(mouse_pos):
-            case_original[idx] = (rect, player_color)
-            return idx  # retourne l'index modifié
-    return None  # rien n'a été cliqué
+            if owner != 0:
+                return False  # case déjà occupée
+
+            # Vérifie si la case touche une case du joueur
+            if not est_adjacent(case_original, idx, joueur_id, taille, offset_x, offset_y):
+                return False  # pas de contact
+
+            # Ok -> on capture la case
+            new_color = joueurs[joueur_id]["color"]
+            case_original[idx] = (rect, new_color, joueur_id)
+            joueurs[joueur_id]["tickets"] -= 1
+            joueurs[joueur_id]["points"] += 1
+            return True
+
+    return False  # aucun clic valide
+
+
+def est_adjacent(case_original, idx, joueur_id, taille, offset_x, offset_y):
+    # Reconvertir l’index en (i,j)
+    largeur = int((len(case_original)) ** 0.5)  # puisque carré 21x21
+    i, j = divmod(idx, largeur)
+
+    voisins = [(i-1,j),(i+1,j),(i,j-1),(i,j+1)]
+    for vi, vj in voisins:
+        if 0 <= vi < largeur and 0 <= vj < largeur:
+            v_idx = vi * largeur + vj
+            _, _, owner = case_original[v_idx]
+            if owner == joueur_id:
+                return True
+    return False
