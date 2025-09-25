@@ -9,6 +9,8 @@ from fonctions.cases import terrains
 joueur_01 = (70, 130, 180)   # Bleu acier
 joueur_02 = (178, 34, 3)     # Rouge brique
 # ------------------------------------------------------- #
+central_color = (255, 165, 0)  # orange pour la ville au centre
+# ------------------------------------------------------- #
 
 
 
@@ -100,7 +102,6 @@ def create_map(screen):
     # ---------------------------
     # 1) placer la zone centrale 3x3 (orange) et les joueurs 3x3 (bleu et rouge)
     # ---------------------------
-    central_color = (255, 165, 0)  # orange
     ci = ligne // 2
     cj = colonne // 2
     # indices pour 3x3 (vérifie les bords juste au cas où)
@@ -217,21 +218,38 @@ def handle_click(mouse_pos, case_original, joueur_id, joueurs, taille, offset_x,
 
     for idx, (rect, couleur, owner) in enumerate(case_original):
         if rect.collidepoint(mouse_pos):
-            if owner != 0:
-                return False  # case déjà occupée
 
-            # Vérifie si la case touche une case du joueur
+            # 1) Vérifie si la case est un terrain (couleur dans terrains.values())
+            if couleur in terrains.values():
+                # → Terrain, capture interdite
+                return False
+
+            # 2) Vérifie si la case est vide OU appartient à un joueur adverse
+            # owner == 0 → libre
+            # owner == joueur_id → déjà ta propre case, donc inutile
+            if owner == joueur_id:
+                return False  # On ne recapture pas sa propre case
+
+            # 3) Vérifie si adjacent à ta zone
             if not est_adjacent(case_original, idx, joueur_id, taille, offset_x, offset_y):
-                return False  # pas de contact
+                return False
 
-            # Ok -> on capture la case
+            # 4) Détermine les points à donner
+            if couleur == central_color:  # zone orange ou ville
+                points_gagnes = 50
+            else:
+                points_gagnes = 10
+
+            # 5) Capture la case
             new_color = joueurs[joueur_id]["color"]
             case_original[idx] = (rect, new_color, joueur_id)
             joueurs[joueur_id]["tickets"] -= 1
-            joueurs[joueur_id]["points"] += 1
+            joueurs[joueur_id]["points"] += points_gagnes
+
             return True
 
     return False  # aucun clic valide
+
 
 
 def est_adjacent(case_original, idx, joueur_id, taille, offset_x, offset_y):

@@ -17,7 +17,7 @@ class affichage_joueurs:
     def update_tickets(self):
         # Ajoute +2 tickets à chaque joueur (appelé à chaque tour)
         for j in self.joueurs.values():
-            j["tickets"] += 2
+            j["tickets"] += 3
 
 
     def add_points(self, joueur, amount):

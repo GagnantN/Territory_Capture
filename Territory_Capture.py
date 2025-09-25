@@ -124,7 +124,7 @@ def jeu():
     joueur_actif = 1
     interface.joueurs[joueur_actif]["tickets"] += 2 # Premier joueur commence avec 2 tickets
     start_time = pg.time.get_ticks()
-    duree_tour = 30 # Secondes
+    duree_tour = 5 #30 # Secondes
 
     # Création de la map
     #WCOLOR, BCOLOR, walls = create_map(screen)
