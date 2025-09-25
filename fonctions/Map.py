@@ -1,157 +1,164 @@
+# fonctions/Map.py
 import pygame as pg
 import random
 from fonctions.cases import terrains
 
-# ----------------- COULEUR JOUEURS -------------------- #
-joueur_01 = (70, 130, 180)   # Bleu acier
-joueur_02 = (178, 34, 3)     # Rouge brique
-# ------------------------------------------------------- #
+# couleurs joueurs (tu peux les garder dans cases.py si tu préfères)
+joueur_01 = (70, 130, 180)
+joueur_02 = (178, 34, 3)
 
 def create_map(screen):
     WIDTH, HEIGHT = screen.get_size()
     BCOLOR = (50, 50, 50)
 
-    ligne = 20
-    colonne = 20
-    taille = min(WIDTH // (colonne + 5), HEIGHT // (ligne + 5))  # taille d’une case
+    ligne, colonne = 20, 20
+    taille = min(WIDTH // (colonne + 5), HEIGHT // (ligne + 5))
 
-    # Grille vide
+    # grille logique : None ou couleur (tuple)
     grid = [[None for _ in range(colonne)] for _ in range(ligne)]
 
-    # -------- Vérifie qu'une case est libre + espacement -------- #
-    def is_valid(i, j, zone_min_col=None, zone_max_col=None, strict=True):
-        """
-        Vérifie si la case est libre, respecte l'espacement et reste dans une zone de colonnes optionnelle.
-        """
+    # helper : vérifier qu'une case candidate est libre et qu'elle n'a pas
+    # de voisin d'une couleur différente (pour garantir l'espace d'une case)
+    def candidate_ok(i, j, color):
         if not (0 <= i < ligne and 0 <= j < colonne):
             return False
-
-        # Case déjà occupée
         if grid[i][j] is not None:
             return False
-
-        # Limite aux colonnes définies
-        if zone_min_col is not None and zone_max_col is not None:
-            if not (zone_min_col <= j <= zone_max_col):
-                return False
-
-        # Vérifie qu'aucune case voisine n'est occupée
-        if strict:
-            for di in [-1, 0, 1]:
-                for dj in [-1, 0, 1]:
-                    ni, nj = i + di, j + dj
-                    if 0 <= ni < ligne and 0 <= nj < colonne:
-                        if grid[ni][nj] is not None:
-                            return False
+        for di in [-1, 0, 1]:
+            for dj in [-1, 0, 1]:
+                ni, nj = i + di, j + dj
+                if 0 <= ni < ligne and 0 <= nj < colonne:
+                    nc = grid[ni][nj]
+                    if nc is not None and nc != color:
+                        # voisin d'une autre couleur → interdit
+                        return False
         return True
 
-    # -------- Générer une zone contiguë -------- #
-    def place_zone(color, size, zone_min_col=None, zone_max_col=None, strict=True):
-        """
-        Place une zone contiguë dans une plage de colonnes (si définie).
-        """
+    # place une zone contiguë de 'size' cases, en autorisant uniquement
+    # des cases qui n'ont pas de voisins d'autres couleurs
+    def place_zone(color, size, zone_min_col=None, zone_max_col=None, attempts_limit=1000):
         attempts = 0
-        while attempts < 1000:  # éviter boucle infinie
+        while attempts < attempts_limit:
             attempts += 1
             i = random.randrange(ligne)
             j = random.randint(zone_min_col if zone_min_col is not None else 0,
                                zone_max_col if zone_max_col is not None else colonne - 1)
+            # respecter la colonne demandée
+            if zone_min_col is not None and zone_max_col is not None:
+                if not (zone_min_col <= j <= zone_max_col):
+                    continue
 
-            if not is_valid(i, j, zone_min_col, zone_max_col, strict):
+            if not candidate_ok(i, j, color):
                 continue
 
+            # init zone
             zone = [(i, j)]
             grid[i][j] = color
 
-            # Expansion aléatoire
+            # expansion par "frontier" : on collecte toutes les cases adjacentes valides
             while len(zone) < size:
-                ci, cj = random.choice(zone)
-                directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-                random.shuffle(directions)
+                frontier = []
+                for (ci, cj) in zone:
+                    for di, dj in [(1,0), (-1,0), (0,1), (0,-1)]:
+                        ni, nj = ci + di, cj + dj
+                        # respecter limite colonnes si fournie
+                        if zone_min_col is not None and zone_max_col is not None:
+                            if not (zone_min_col <= nj <= zone_max_col):
+                                continue
+                        if candidate_ok(ni, nj, color):
+                            frontier.append((ni, nj))
+                if not frontier:
+                    break  # plus de place pour grandir
+                ni, nj = random.choice(frontier)
+                grid[ni][nj] = color
+                zone.append((ni, nj))
 
-                placed = False
-                for di, dj in directions:
-                    ni, nj = ci + di, cj + dj
-                    if is_valid(ni, nj, zone_min_col, zone_max_col, strict=False):
-                        grid[ni][nj] = color
-                        zone.append((ni, nj))
-                        placed = True
-                        break
-
-                if not placed:  # aucune extension possible
-                    break
-
-            if len(zone) == size:
+            if len(zone) >= size:
                 return True
 
-            # Sinon, reset
+            # rollback si on n'a pas atteint la taille
             for x, y in zone:
                 grid[x][y] = None
 
         return False
 
-    # -------- Placement des obstacles dans les zones de spawn -------- #
-    def place_spawn_obstacles(min_col, max_col):
-        """
-        Place exactement 1 zone de chaque type dans une zone de spawn.
-        """
+    # ---------------------------
+    # 1) placer la zone centrale 3x3 (orange)
+    # ---------------------------
+    central_color = (255, 165, 0)  # orange
+    ci = ligne // 2
+    cj = colonne // 2
+    # indices pour 3x3 (vérifie les bords juste au cas où)
+    for di in (-1, 0, 1):
+        for dj in (-1, 0, 1):
+            ni, nj = ci + di, cj + dj
+            if 0 <= ni < ligne and 0 <= nj < colonne:
+                grid[ni][nj] = central_color
+    print("[CENTER] 3x3 centrale placée")
+
+    # ---------------------------
+    # 2) placer au moins 1 zone de chaque terrain dans GAUCHE / CENTRE / DROITE
+    # zones de colonnes : gauche 0-4, centre 5-14, droite 15-19
+    # taille aléatoire entre 4 et 7
+    # ---------------------------
+    areas = [
+        (0, 4, "GAUCHE"),
+        (5, 14, "CENTRE"),
+        (15, 19, "DROITE"),
+    ]
+
+    for min_col, max_col, label in areas:
         for name, color in terrains.items():
-            ok = place_zone(color, 6, zone_min_col=min_col, zone_max_col=max_col, strict=True)
+            size = random.randint(4, 7)
+            ok = place_zone(color, size, zone_min_col=min_col, zone_max_col=max_col, attempts_limit=2000)
             if ok:
-                print(f"[SPAWN] Zone placée pour {name} ({min_col}-{max_col})")
+                print(f"[{label}] {name} taille {size} placé")
             else:
-                print(f"[SPAWN] Impossible de placer {name} ({min_col}-{max_col})")
+                print(f"[{label}] échec placement {name} taille {size}")
 
-    # Joueur 1 → colonnes 0-4
-    place_spawn_obstacles(0, 4)
-
-    # Joueur 2 → colonnes 15-19
-    place_spawn_obstacles(15, 19)
-
-    # -------- Placement du reste des zones dans la zone centrale -------- #
-    for name, color in terrains.items():
-        for z in range(4):  # nombre de zones centrales
-            ok = place_zone(color, 6, zone_min_col=5, zone_max_col=14, strict=True)
-            if ok:
-                print(f"[CENTRAL] Zone placée pour {name} #{z+1}")
-            else:
-                print(f"[CENTRAL] Impossible de placer {name} #{z+1}")
-
-    # -------- Placement des joueurs -------- #
+    # ---------------------------
+    # 3) placer joueurs : chercher une case vraiment vide (et séparée)
+    # ---------------------------
     def place_player(color, min_col, max_col):
-        """
-        Place un joueur dans une case vide avec une zone de sécurité autour.
-        """
-        attempts = 0
-        while attempts < 500:
-            attempts += 1
+        for _ in range(1000):
             i = random.randrange(ligne)
             j = random.randint(min_col, max_col)
-
-            if is_valid(i, j, zone_min_col=min_col, zone_max_col=max_col, strict=True):
+            # ici on veut une case ayant aucun voisin occupé (safe spawn)
+            if not (0 <= i < ligne and 0 <= j < colonne):
+                continue
+            if grid[i][j] is not None:
+                continue
+            ok = True
+            for di in [-1,0,1]:
+                for dj in [-1,0,1]:
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < ligne and 0 <= nj < colonne:
+                        if grid[ni][nj] is not None:
+                            ok = False
+                            break
+                if not ok:
+                    break
+            if ok:
                 grid[i][j] = color
-                print(f"Joueur placé en ({i},{j}) - {color}")
                 return (i, j)
-
-        print(f"Impossible de placer le joueur {color} après {attempts} tentatives")
         return None
 
-    # Joueur 1 à gauche
     pos_joueur_1 = place_player(joueur_01, 0, 4)
-
-    # Joueur 2 à droite
     pos_joueur_2 = place_player(joueur_02, 15, 19)
+    print(f"Players placed: {pos_joueur_1}, {pos_joueur_2}")
 
-    # -------- Création des cases -------- #
+    # ---------------------------
+    # 4) convertir en liste de rects + couleurs
+    # ---------------------------
     case_original = []
     for i in range(ligne):
         for j in range(colonne):
             x = int(WIDTH * 0.25) + j * taille
             y = int(HEIGHT * 0.1) + i * taille
             rect = pg.Rect(x, y, taille, taille)
-
             couleur = grid[i][j] if grid[i][j] is not None else (191, 183, 161)
             case_original.append((rect, couleur))
 
     print(f"Total cases créées : {len(case_original)}")
-    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2
+    # retourne aussi la taille utile pour dessiner les joueurs facilement
+    return BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille

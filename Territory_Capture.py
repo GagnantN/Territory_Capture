@@ -107,7 +107,7 @@ def page_accueil():
 # ------------------------ JEU -------------------------- #
 def jeu():
     # Maps
-    BCOLOR, case_original, pos_joueur_1, pos_joueur_2 = create_map(screen)
+    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille = create_map(screen)
     running = True
     menu_actif = False
     retour_menu = False # Revenir au menu principal
@@ -159,15 +159,15 @@ def jeu():
         # Dessiner les joueurs
         if pos_joueur_1:
             i, j = pos_joueur_1
-            x = int(largeur * 0.25) + j * (rect.width)
-            y = int(hauteur * 0.1) + i * (rect.height)
-            pg.draw.rect(screen, (70, 130, 180), (x, y, rect.width, rect.height))  # joueur_01
+            x = int(largeur * 0.25) + j * (taille)
+            y = int(hauteur * 0.1) + i * (taille)
+            pg.draw.rect(screen, (70, 130, 180), (x, y, taille, taille))  # joueur_01
 
         if pos_joueur_2:
             i, j = pos_joueur_2
-            x = int(largeur * 0.25) + j * (rect.width)
-            y = int(hauteur * 0.1) + i * (rect.height)
-            pg.draw.rect(screen, (178, 34, 3), (x, y, rect.width, rect.height))  # joueur_02
+            x = int(largeur * 0.25) + j * taille
+            y = int(hauteur * 0.1) + i * taille
+            pg.draw.rect(screen, (178, 34, 3), (x, y, taille, taille))  # joueur_02
 
 
 
