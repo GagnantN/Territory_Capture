@@ -47,9 +47,9 @@ def afficher_menu():
     screen.blit(menu_surface, (0,0))
 
     # Bouton quitter vers menu principal
-    btn_quitter_jeu = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 200, 80)
+    btn_quitter_jeu = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 300, 80)
     pg.draw.rect(screen, ROUGE, btn_quitter_jeu, border_radius=15)
-    txt_quitter = font_bouton.render("Quitter", True, BLANC)
+    txt_quitter = font_bouton.render("Retour au menu", True, BLANC)
     screen.blit(txt_quitter, (btn_quitter_jeu.centerx - txt_quitter.get_width()//2,
                               btn_quitter_jeu.centery - txt_quitter.get_height()//2))
     
