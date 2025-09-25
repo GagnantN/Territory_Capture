@@ -2,10 +2,14 @@ import pygame as pg
 import random
 from fonctions.cases import terrains
 
+
+
 # ----------------- COULEUR JOUEURS -------------------- #
 joueur_01 = (70, 130, 180)   # Bleu acier
 joueur_02 = (178, 34, 3)     # Rouge brique
 # ------------------------------------------------------- #
+
+
 
 def create_map(screen):
     WIDTH, HEIGHT = screen.get_size()
@@ -17,6 +21,8 @@ def create_map(screen):
 
     # Grille vide
     grid = [[None for _ in range(colonne)] for _ in range(ligne)]
+
+
 
     # -------- Vérifie qu'une case est libre + espacement -------- #
     def is_valid(i, j, zone_min_col=None, zone_max_col=None, strict=True):
@@ -44,6 +50,8 @@ def create_map(screen):
                         if grid[ni][nj] is not None:
                             return False
         return True
+
+
 
     # -------- Générer une zone contiguë -------- #
     def place_zone(color, size, zone_min_col=None, zone_max_col=None, strict=True):
@@ -90,6 +98,8 @@ def create_map(screen):
 
         return False
 
+
+
     # -------- Placement des obstacles dans les zones de spawn -------- #
     def place_spawn_obstacles(min_col, max_col):
         """
@@ -108,6 +118,8 @@ def create_map(screen):
     # Joueur 2 → colonnes 15-19
     place_spawn_obstacles(15, 19)
 
+
+
     # -------- Placement du reste des zones dans la zone centrale -------- #
     for name, color in terrains.items():
         for z in range(4):  # nombre de zones centrales
@@ -116,6 +128,8 @@ def create_map(screen):
                 print(f"[CENTRAL] Zone placée pour {name} #{z+1}")
             else:
                 print(f"[CENTRAL] Impossible de placer {name} #{z+1}")
+
+
 
     # -------- Placement des joueurs -------- #
     def place_player(color, min_col, max_col):
@@ -136,11 +150,17 @@ def create_map(screen):
         print(f"Impossible de placer le joueur {color} après {attempts} tentatives")
         return None
 
+
+
     # Joueur 1 à gauche
     pos_joueur_1 = place_player(joueur_01, 0, 4)
 
+
+
     # Joueur 2 à droite
     pos_joueur_2 = place_player(joueur_02, 15, 19)
+
+
 
     # -------- Création des cases -------- #
     case_original = []
