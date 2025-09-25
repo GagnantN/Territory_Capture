@@ -40,7 +40,7 @@ btn_quitter = pg.Rect(largeur//2 - 100, hauteur//2 + 60, 200, 80)
 # Bouton menu
 btn_menu = pg.Rect(20, 20, 120, 50)
 # Bouton skip partie
-btn_skip = pg.Rect(largeur//2 - 150, hauteur - 100, 300, 60)
+btn_skip = pg.Rect(largeur//2 - 150, hauteur - 70, 300, 60)
 # ------------------------------------------------------- #
 
 
@@ -126,10 +126,19 @@ def jeu():
     retour_menu = False # Revenir au menu principal
     joueur_actif = 1
     interface.joueurs[joueur_actif]["tickets"] += 2 # Premier joueur commence avec 2 tickets
+
+    # Chrono par tour
     start_time = pg.time.get_ticks()
-    duree_tour = 30 # Secondes
-    chrono = duree_tour # Initialise le chrono
+    duree_tour = 30
+    chrono = duree_tour
     chrono_en_pause = chrono
+
+    # Chrono globale (10 minutes)
+    duree_totale_partie = 600 # Secondes
+    start_partie = pg.time.get_ticks()
+    # partie_elapsed_pause = 0
+    pause_offset = 0
+    pause_start = None
 
     btn_quitter_jeu, btn_fermer_menu = None, None
 
@@ -145,13 +154,18 @@ def jeu():
             if event.type == pg.QUIT:
                 running = False
 
-            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:       ###
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
                 menu_actif = not menu_actif
                 if menu_actif:
                     chrono_en_pause = chrono # Figer le chrono
+                    pause_start = pg.time.get_ticks()                   #####
                 else:
                     # Reprendre le chrono correctement
                     start_time = pg.time.get_ticks() - (duree_tour - chrono_en_pause) * 1000
+
+                    if pause_start is not None:
+                        pause_offset += pg.time.get_ticks() - pause_start
+                        pause_start = None
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if menu_actif:
@@ -162,13 +176,19 @@ def jeu():
                         menu_actif = False
                         # Reprendre le chrono à partir de la valeur figée
                         start_time = pg.time.get_ticks() - (duree_tour - chrono_en_pause) * 1000
+                        # Ajuster chrono global
+                        if pause_start is not None:
+                            pause_offset += pg.time.get_ticks() - pause_start
+                            pause_start = None
+                
                 else:
-
                     # Quand le menu est inactif
                     if btn_menu.collidepoint(event.pos):
                         menu_actif = True
                         chrono_en_pause = chrono  # Figer le chrono
-                        continue  # On sort ici pour ne pas exécuter le reste du code 
+                        pause_start = pg.time.get_ticks()                       #####
+                        # partie_elapsed_pause = int((pg.time.get_ticks() - start_partie) // 1000)
+                        continue
                     
                     # Skip tour
                     if btn_skip.collidepoint(event.pos):
@@ -190,15 +210,16 @@ def jeu():
                         return True  # Retourne au menu principal
 
 
-                if btn_menu.collidepoint(event.pos):
-                    menu_actif = True
-                    chrono_en_pause = chrono
+                # if btn_menu.collidepoint(event.pos):
+                #     menu_actif = True
+                #     chrono_en_pause = chrono
 
         # Chrono
-        if not menu_actif:                                      #####
+        if not menu_actif:
             # Vérifier si 30 secondes écoulées
             elapsed = (pg.time.get_ticks() - start_time) / 1000
             chrono = max(0, duree_tour - int(elapsed))
+
             if elapsed >= duree_tour:
                 # Changer de joueur
                 joueur_actif = 2 if joueur_actif == 1 else 1
@@ -206,8 +227,26 @@ def jeu():
                 start_time = pg.time.get_ticks() # Reset chronomètre
 
         else:
-            # Chrono figé
             chrono = chrono_en_pause # Figé
+
+
+
+        # Chrono global de la partie
+        if pause_start is not None:
+            elapsed_partie = int(pause_start - start_partie - pause_offset) // 1000
+        
+        else:
+            elapsed_partie = int(pg.time.get_ticks() - start_partie - pause_offset) // 1000
+
+
+        temps_restant = max(0, duree_totale_partie - int(elapsed_partie))
+        minutes, secondes = divmod(int(temps_restant), 60)
+        texte_temps = f"{minutes:02d}:{secondes:02d}"
+
+        # Fin automatique
+        if temps_restant <=0:
+            retour_menu = True
+            running = False
 
 
         # Affichage jeu
@@ -239,9 +278,14 @@ def jeu():
         interface.draw(joueur_actif)
 
 
-        # Chrono
+        # Chrono de tour
         txt_timer = pg.font.SysFont("arial",48,bold=True).render(str(chrono), True, (255, 255, 0))
         screen.blit(txt_timer, (largeur//2 - txt_timer.get_width()//2, 20))
+
+
+        # Chrono global (fin de la partie)
+        txt_fin_partie = font_timer.render(f"Fin de la partie : {texte_temps}", True, (255, 255, 255))
+        screen.blit(txt_fin_partie, (20, hauteur - txt_fin_partie.get_height() - 20))
 
 
         # Bouton Menu en jeu
@@ -251,8 +295,7 @@ def jeu():
                                btn_menu.centery - txt_menu.get_height()//2))
         
 
-
-        # Bouton Skip (Uniquement si menu non actif)
+        # Bouton Skip (Si menu non actif)
         if not menu_actif:
             pg.draw.rect(screen, (24, 26, 32), btn_skip)
             pg.draw.rect(screen, (255, 255, 0), btn_skip, width=3, border_radius=12)
@@ -263,8 +306,8 @@ def jeu():
 
         # Overlay menu
         if menu_actif:
-            # btn_quitter_jeu = afficher_menu()
             btn_quitter_jeu, btn_fermer_menu = afficher_menu()
+
 
         pg.display.flip()
 
