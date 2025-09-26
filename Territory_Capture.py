@@ -235,9 +235,9 @@ def jeu():
 
         screen.fill((24, 26, 32))
 
-        for rect, couleur, owner in case_original:
-            pg.draw.rect(screen, couleur, rect)
-            pg.draw.rect(screen, BCOLOR, rect, 1)
+        for rect, texture, owner, cell in case_original:
+            screen.blit(texture, rect.topleft)
+            pg.draw.rect(screen, BCOLOR, rect, 1) # bordure autour de la case
             
         if pos_joueur_1:
             i, j = pos_joueur_1
