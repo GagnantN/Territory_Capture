@@ -181,7 +181,8 @@ def create_map(screen):
                 # joueur ou centre ou None -> surface colorée
                 texture = pg.Surface((taille,taille))
                 # si cell est None on met une couleur par défaut
-                texture.fill(cell if cell is not None else (191,183,161))
+                texture.fill(cell if cell is not None else (191,183,161)) # Couleur map
+
 
             # NOTE: on stocke aussi 'cell' pour pouvoir faire des tests (terrains.values()) plus tard
             case_original.append((rect, texture, grid_owner[i][j], cell))
