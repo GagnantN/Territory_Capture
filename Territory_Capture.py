@@ -1,5 +1,5 @@
 import pygame as pg, sys
-from fonctions.Map import create_map, joueur_01, joueur_02, handle_click, afficher_victoire # AJOUT
+from fonctions.Map import create_map, joueur_01, joueur_02, handle_click, afficher_victoire, handle_unit_events, draw_units, update_unit_animation # AJOUT
 from fonctions.interface_joueurs import affichage_joueurs
 
 
@@ -115,7 +115,7 @@ def page_accueil():
 # ------------------------ JEU -------------------------- #
 def jeu():
     # Maps
-    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2 = create_map(screen)
+    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2, unites, terrain_grid = create_map(screen)
 
 
     # Interface joueurs                                                 
@@ -138,21 +138,11 @@ def jeu():
     joueur_actif = 1
     interface.joueurs[joueur_actif]["tickets"] += 2 # Premier joueur commence avec 2 tickets
 
-    # Chrono par tour
-    start_time = pg.time.get_ticks()
-    duree_tour = 30
-    chrono = duree_tour
-    chrono_en_pause = chrono
-
-    # Chrono globale (10 minutes)
-    duree_totale_partie = 600 # Secondes
-    start_partie = pg.time.get_ticks()
-    # partie_elapsed_pause = 0
-    pause_offset = 0
-    pause_start = None
-
+    ##### Chronos
+    start_time, duree_tour, chrono, chrono_en_pause = pg.time.get_ticks(), 30, 30, 30
+    duree_totale_partie, start_partie = 600, pg.time.get_ticks()
+    pause_offset, pause_start = 0, None
     btn_quitter_jeu, btn_fermer_menu = None, None
-
 
     # Création de la map
     #WCOLOR, BCOLOR, walls = create_map(screen)
@@ -178,7 +168,12 @@ def jeu():
                         pause_offset += pg.time.get_ticks() - pause_start
                         pause_start = None
 
-            if event.type == pg.MOUSEBUTTONDOWN:
+            if event.type in (pg.MOUSEBUTTONDOWN, pg.MOUSEBUTTONUP, pg.MOUSEMOTION):
+                # Gestion unités (drag & drop)
+                moved = handle_unit_events(event, unites, joueur_actif, interface, offset_x, offset_y, taille, grid_points, case_original, terrain_grid)
+                if moved:
+                    continue  # on ne fait rien d’autre si une unité a bougé
+                
                 if menu_actif:
                     if btn_quitter_jeu and btn_quitter_jeu.collidepoint(event.pos):
                         retour_menu = True
@@ -194,12 +189,13 @@ def jeu():
                 
                 else:
                     # Quand le menu est inactif
-                    if btn_menu.collidepoint(event.pos):
-                        menu_actif = True
-                        chrono_en_pause = chrono  # Figer le chrono
-                        pause_start = pg.time.get_ticks()                       #####
-                        # partie_elapsed_pause = int((pg.time.get_ticks() - start_partie) // 1000)
-                        continue
+                    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:  # clic gauche
+                        if btn_skip.collidepoint(event.pos):
+                            joueur_actif = 2 if joueur_actif == 1 else 1
+                            interface.joueurs[joueur_actif]["tickets"] += 2
+                            start_time = pg.time.get_ticks()
+                            chrono = duree_tour
+
                     
                     # Skip tour
                     if btn_skip.collidepoint(event.pos):
@@ -209,16 +205,15 @@ def jeu():
                         chrono = duree_tour # Reset chrono
 
                     # Clic sur map
-                    mouse_pos = pg.mouse.get_pos()
-                    handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points, joueurs_data) # Appel les joueurs
-                    
-                    resultat = handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points, joueurs_data)
+                    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:  # clic gauche
+                        mouse_pos = event.pos
+                        resultat = handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points, joueurs_data)
+                        if isinstance(resultat, tuple) and resultat[0] == "VICTOIRE":
+                            gagnant = joueur_actif
+                            afficher_victoire(screen, gagnant, largeur, hauteur)
+                            return True
 
-                    # Si la fonction retourne une victoire
-                    if isinstance(resultat, tuple) and resultat[0] == "VICTOIRE":
-                        gagnant = joueur_actif
-                        afficher_victoire(screen, gagnant, largeur, hauteur)
-                        return True  # Retourne au menu principal
+
 
 
                 # if btn_menu.collidepoint(event.pos):
@@ -227,15 +222,18 @@ def jeu():
 
         # Chrono
         if not menu_actif:
-            # Vérifier si 30 secondes écoulées
             elapsed = (pg.time.get_ticks() - start_time) / 1000
             chrono = max(0, duree_tour - int(elapsed))
 
             if elapsed >= duree_tour:
+                # Ajouter les tickets au joueur qui vient de finir son tour
+                interface.joueurs[joueur_actif]["tickets"] += 2
                 # Changer de joueur
                 joueur_actif = 2 if joueur_actif == 1 else 1
-                interface.joueurs[joueur_actif]["tickets"] +=2
-                start_time = pg.time.get_ticks() # Reset chronomètre
+                start_time = pg.time.get_ticks()  # Reset chronomètre
+                chrono = duree_tour
+
+
 
         else:
             chrono = chrono_en_pause # Figé
@@ -283,6 +281,18 @@ def jeu():
             # x = offset_x + j * taille
             # y = offset_y + i * taille
             pg.draw.rect(screen, (178, 34, 3), (offset_x + j*taille, offset_y + i*taille, taille, taille))  # joueur_02
+
+        # Dessiner les unités (drag & drop inclus)
+        draw_units(screen, unites, interface, offset_x, offset_y, taille)
+        
+        # Dessiner les unités (drag & drop inclus)
+        draw_units(screen, unites, interface, offset_x, offset_y, taille)
+
+        update_unit_animation(unites, interface, case_original, grid_points, taille, offset_x, offset_y)
+
+
+
+
 
 
         # HUD des joueurs
