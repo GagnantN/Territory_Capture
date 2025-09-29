@@ -255,10 +255,10 @@ def handle_unit_events(event, unites, joueur_actif, interface,
                     uy = offset_y + i * taille + (taille - unite_size) // 2
                     rect_unit = pg.Rect(ux, uy, unite_size, unite_size)
                     if rect_unit.collidepoint(mouse_x, mouse_y):
-                        if joueur_id == joueur_actif and interface.joueurs[joueur_id]["tickets"] >= 5:
+                        if joueur_id == joueur_actif and interface.joueurs[joueur_id]["tickets"] >= 1:
                             selected_unit = (joueur_id, idx)
                             # forbidden = couleurs représentant obstacles (eau, montagne)
-                            forbidden = [terrains["eau"], terrains["montagne"]]
+                            forbidden = [terrains["eau"], terrains["montagne"], terrains["foret"], terrains["bordure"]]
                             # IMPORTANT : passer terrain_grid (couleurs) au lieu de grid_points
                             reachable_cells = set(get_reachable_cells((i, j), 5, terrain_grid, forbidden, case_original))
                             current_path = []
@@ -291,7 +291,7 @@ def handle_unit_events(event, unites, joueur_actif, interface,
             joueur_id, idx = selected_unit
             # lancer l'animation pas-à-pas
             animating_move = (joueur_id, idx, current_path, 0)
-            interface.joueurs[joueur_id]["tickets"] -= 5
+            interface.joueurs[joueur_id]["tickets"] -= 1
             # reset sélection / zone
             selected_unit = None
             reachable_cells = []
