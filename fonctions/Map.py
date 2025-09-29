@@ -269,20 +269,20 @@ def handle_unit_events(event, unites, joueur_actif, interface,
     # --- mouvement souris pendant drag : prévisualiser chemin ---
     if event.type == pg.MOUSEMOTION and dragging and selected_unit:
         joueur_id, idx = selected_unit
-        start = unites[joueur_id][idx]
-        # vérifier limites
-        nrows = len(terrain_grid)
-        ncols = len(terrain_grid[0]) if nrows > 0 else 0
-        if 0 <= grid_i < nrows and 0 <= grid_j < ncols and (grid_i, grid_j) in reachable_cells:
-            forbidden = [terrains["eau"], terrains["montagne"]]
-            path = find_path(start, (grid_i, grid_j), terrain_grid, forbidden, case_original)
-            if path and len(path)-1 <= 5:
-                current_path = path
-            else:
-                current_path = []
-        else:
-            current_path = []
-        return False
+        nrows, ncols = len(terrain_grid), len(terrain_grid[0])
+
+        if 0 <= grid_i < nrows and 0 <= grid_j < ncols:
+            # Vérifier que ce n'est pas une case interdite
+            forbidden = [terrains["eau"], terrains["montagne"], terrains["foret"], terrains["bordure"]]
+            if terrain_grid[grid_i][grid_j] not in forbidden:
+                if not current_path:
+                    current_path = [unites[joueur_id][idx]]
+                last_i, last_j = current_path[-1]
+                # autoriser que si on se déplace d'une case adjacente
+                if abs(grid_i - last_i) + abs(grid_j - last_j) == 1:
+                    if len(current_path) < 6:  # max 5 déplacements
+                        current_path.append((grid_i, grid_j))
+
 
     # --- relâcher clic gauche : valider déplacement si possible ---
     if event.type == pg.MOUSEBUTTONUP and event.button == 1 and dragging:
@@ -394,6 +394,19 @@ def update_unit_animation(unites, interface, case_original, grid_points, taille,
                     interface.joueurs[owner]["points"] = max(0, interface.joueurs[owner]["points"])
 
             animating_move = (joueur_id, idx, path, step+1)
+
+            # Mettre à jour la position logique de l'unité
+            unites[joueur_id][idx] = (next_i, next_j)
+
+            # --- Vérifier si une unité adverse est présente ici ---
+            for adv_id, adv_units in unites.items():
+                if adv_id != joueur_id:
+                    for adv_idx, (ai, aj) in enumerate(adv_units):
+                        if (ai, aj) == (next_i, next_j):
+                            # Supprimer l’unité adverse
+                            del adv_units[adv_idx]
+                            break
+
         else:
             animating_move = None  # fin animation
 
