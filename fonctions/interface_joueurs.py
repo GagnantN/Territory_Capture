@@ -61,8 +61,8 @@ class affichage_joueurs:
         color_nom = (255, 255, 0) if actif else joueur["color"]
 
         titre = self.font.render(joueur["nom"], True, color_nom)    #####
-        points = self.font.render(f"Points: {joueur['points']}", True, (255, 255, 255))
-        tickets = self.font.render(f"Tickets: {joueur['tickets']}", True, (255, 255, 255))
+        points = self.font.render(f"Points : {joueur['points']}", True, (255, 255, 255))
+        tickets = self.font.render(f"Tickets : {joueur['tickets']}", True, (255, 255, 255))
 
         # Si actif : encadré autour
         if actif:

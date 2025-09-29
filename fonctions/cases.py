@@ -49,7 +49,7 @@ def get_reachable_cells(start, max_range, grid_points, forbidden_types, case_ori
             ni, nj = i + di, j + dj
             if 0 <= ni < nrows and 0 <= nj < ncols:
                 idx = ni * ncols + nj
-                _, couleur, _ = case_original[idx]
+                rect, couleur, owner, cell = case_original[idx]
                 if couleur not in forbidden_types:
                     queue.append(((ni, nj), dist+1))
 
