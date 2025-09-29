@@ -174,7 +174,7 @@ def jeu():
                 if moved:
                     continue  # on ne fait rien d’autre si une unité a bougé
                 
-                if menu_actif:
+                if menu_actif and event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                     if btn_quitter_jeu and btn_quitter_jeu.collidepoint(event.pos):
                         retour_menu = True
                         running = False
@@ -196,32 +196,13 @@ def jeu():
                             start_time = pg.time.get_ticks()
                             chrono = duree_tour
 
-                    
-                    # Skip tour
-                    if btn_skip.collidepoint(event.pos):
-                        joueur_actif = 2 if joueur_actif == 1 else 1
-                        interface.joueurs[joueur_actif]["tickets"] += 2
-                        start_time = pg.time.get_ticks()
-                        chrono = duree_tour # Reset chrono
-
-                    # Clic sur map
-                    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:  # clic gauche
-                        mouse_pos = event.pos
-                        resultat = handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs, taille, offset_x, offset_y, grid_points, joueurs_data)
-                        if isinstance(resultat, tuple) and resultat[0] == "VICTOIRE":
-                            gagnant = joueur_actif
-                            afficher_victoire(screen, gagnant, largeur, hauteur)
-                            return True
-
-
-
-
-                # if btn_menu.collidepoint(event.pos):
-                #     menu_actif = True
-                #     chrono_en_pause = chrono
+                        if btn_menu.collidepoint(event.pos):
+                            menu_actif = True
+                            chrono_en_pause = chrono
+                            pause_start = pg.time.get_ticks()
 
         # Chrono
-        if not menu_actif:
+        if not menu_actif :
             elapsed = (pg.time.get_ticks() - start_time) / 1000
             chrono = max(0, duree_tour - int(elapsed))
 

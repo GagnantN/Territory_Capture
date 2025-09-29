@@ -275,7 +275,7 @@ def handle_unit_events(event, unites, joueur_actif, interface,
         ncols = len(terrain_grid[0]) if nrows > 0 else 0
         if 0 <= grid_i < nrows and 0 <= grid_j < ncols and (grid_i, grid_j) in reachable_cells:
             forbidden = [terrains["eau"], terrains["montagne"]]
-            path = find_path(start, (grid_i, grid_j), terrain_grid, forbidden)
+            path = find_path(start, (grid_i, grid_j), terrain_grid, forbidden, case_original)
             if path and len(path)-1 <= 5:
                 current_path = path
             else:
