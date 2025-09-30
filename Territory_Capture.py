@@ -211,7 +211,7 @@ def jeu():
         screen.fill((24, 26, 32))
 
         # Afficher map
-        for rect, texture, owner, cell in case_original:
+        for rect, texture, owner, cell, is_terrain in case_original:
             screen.blit(texture, rect.topleft)
             pg.draw.rect(screen, BCOLOR, rect, 1)
 
@@ -224,7 +224,8 @@ def jeu():
             pg.draw.rect(screen, (178, 34, 3), (offset_x + j*taille, offset_y + i*taille, taille, taille))
 
         draw_units(screen, unites, interface, offset_x, offset_y, taille)
-        update_unit_animation(unites, interface, case_original, grid_points, taille, offset_x, offset_y)
+        # <-- IMPORTANT : on passe maintenant joueurs_data pour la détection de spawn/victoire
+        update_unit_animation(unites, interface, case_original, grid_points, taille, offset_x, offset_y, joueurs_data)
 
         # HUD
         interface.draw(joueur_actif)

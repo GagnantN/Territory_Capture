@@ -49,8 +49,8 @@ def get_reachable_cells(start, max_range, grid_points, forbidden_types, case_ori
             ni, nj = i + di, j + dj
             if 0 <= ni < nrows and 0 <= nj < ncols:
                 idx = ni * ncols + nj
-                rect, couleur, owner, cell = case_original[idx]
-                if couleur not in forbidden_types:
+                _, _, _, _, is_terrain = case_original[idx]
+                if not is_terrain:
                     queue.append(((ni, nj), dist+1))
 
     return reachable
@@ -82,8 +82,8 @@ def find_path(start, goal, grid_points, forbidden_types, case_original):
                 if neighbor in came_from:
                     continue
                 idx = ni * ncols + nj
-                _, couleur, _ = case_original[idx]
-                if couleur in forbidden_types:
+                _, _, _, _, is_terrain = case_original[idx]
+                if is_terrain:
                     continue
                 came_from[neighbor] = current
                 queue.append(neighbor)
