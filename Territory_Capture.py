@@ -1,5 +1,5 @@
 import pygame as pg, sys
-from fonctions.Map import create_map, joueur_01, joueur_02, textures, handle_click, afficher_victoire, handle_unit_events, draw_units, update_unit_animation
+from fonctions.Map import create_map, joueur_01, joueur_02, textures, handle_click, afficher_victoire, handle_unit_events, draw_units, update_unit_animation, draw_murailles
 from fonctions.interface_joueurs import affichage_joueurs
 
 pg.init()
@@ -92,7 +92,7 @@ def page_accueil():
 
 # ----------------- JEU ----------------- #
 def jeu():
-    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, terrains, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2, unites, terrain_grid = create_map(screen)
+    BCOLOR, case_original, pos_joueur_1, pos_joueur_2, terrains, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2, unites, terrain_grid, murailles = create_map(screen)
 
     interface = affichage_joueurs(screen, joueur_01, joueur_02)
 
@@ -214,6 +214,9 @@ def jeu():
         for rect, texture, owner, cell, is_terrain in case_original:
             screen.blit(texture, rect.topleft)
             pg.draw.rect(screen, BCOLOR, rect, 1)
+
+        # Dessiner murailles
+        draw_murailles(screen, murailles, case_original, len(grid_points[0]))
 
         # Joueurs
         if pos_joueur_1:
