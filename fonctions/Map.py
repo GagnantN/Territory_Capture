@@ -19,7 +19,7 @@ dragging = False
 # ----------------- CHARGEMENT DES TEXTURES ------------- #
 IMAGE_PATH = "Images"
 textures = {
-    "eau": pg.image.load(os.path.join(IMAGE_PATH, "Eau.png")),
+    "eau"  : pg.image.load(os.path.join(IMAGE_PATH, "Eau.png")),
     "roche": pg.image.load(os.path.join(IMAGE_PATH, "Roche.png")),
     "foret": pg.image.load(os.path.join(IMAGE_PATH, "Foret.png")),
     "sable": pg.image.load(os.path.join(IMAGE_PATH, "Sable.png")),

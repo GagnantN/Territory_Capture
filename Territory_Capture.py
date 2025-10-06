@@ -14,6 +14,7 @@ largeur, hauteur = screen.get_size()
 pg.display.set_caption("Territory Capture")
 # ------------------------------------------------------- #
 
+
 # ----------------------- COULEUR ----------------------- #
 BLANC = (255, 255, 255)
 NOIR = (0, 0, 0)
@@ -22,11 +23,13 @@ ROUGE = (200, 50, 50)
 VERT = (50, 200, 50)
 # ------------------------------------------------------- #
 
+
 # ----------------------- POLICE ------------------------ #
 font_titre = pg.font.SysFont("arial", 60, bold=True)
 font_bouton = pg.font.SysFont("arial", 40)
 font_timer = pg.font.SysFont("arial", 48, bold=True)
 # ------------------------------------------------------- #
+
 
 # ---------------------- BOUTONS ------------------------ #
 btn_jouer = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 200, 80)
@@ -34,9 +37,11 @@ btn_quitter = pg.Rect(largeur//2 - 100, hauteur//2 + 60, 200, 80)
 btn_menu = pg.Rect(20, 20, 120, 50)
 btn_skip = pg.Rect(largeur//2 - 150, hauteur - 70, 300, 60)
 btn_bonus = pg.Rect(0, 0, 250, 60)
+btn_creer_unite = pg.Rect(0, 0, 250, 60)                            ######
 # ------------------------------------------------------- #
 
-# ----------------- MENU ----------------- #
+
+# ------------------------ MENU ------------------------- #
 def afficher_menu():
     menu_surface = pg.Surface((largeur, hauteur), pg.SRCALPHA)
     menu_surface.fill((50, 50, 50, 200))
@@ -55,9 +60,10 @@ def afficher_menu():
                                 btn_fermer_menu.centery - txt_fermer.get_height()//2))
 
     return btn_quitter_jeu, btn_fermer_menu
-# ---------------------------------------- #
+# ------------------------------------------------------- #
 
-# ----------------- PAGE ACCUEIL ----------------- #
+
+# -------------------- PAGE ACCUEIL --------------------- #
 def page_accueil():
     en_cours = True
     while en_cours:
@@ -88,13 +94,17 @@ def page_accueil():
 
         pg.display.flip()
         clock.tick(60)
-# ---------------------------------------------- #
+# ------------------------------------------------------- #
 
-# ----------------- JEU ----------------- #
+
+# ------------------------- JEU ------------------------- #
 def jeu():
     BCOLOR, case_original, pos_joueur_1, pos_joueur_2, terrains, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2, unites, terrain_grid = create_map(screen)
 
     interface = affichage_joueurs(screen, joueur_01, joueur_02)
+
+    mode_creation_unite = False
+    unite_ghost_pos = None
 
     # Ajouter points zones spawn
     for ni, nj in spawn_zone_1:
@@ -121,23 +131,29 @@ def jeu():
     pause_start = None
     btn_quitter_jeu, btn_fermer_menu = None, None
 
+
     while running:
         dt = clock.tick(60) / 1000.0
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
+
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     menu_actif = not menu_actif
+
                     if menu_actif:
                         chrono_en_pause = chrono
                         pause_start = pg.time.get_ticks()
+
                     else:
                         start_time = pg.time.get_ticks() - (duree_tour - chrono_en_pause) * 1000
+
                         if pause_start is not None:
                             pause_offset += pg.time.get_ticks() - pause_start
                             pause_start = None
+
                 if event.key == pg.K_SPACE and not menu_actif:
                     joueur_actif = 2 if joueur_actif == 1 else 1
                     interface.joueurs[joueur_actif]["tickets"] += 2 + interface.joueurs[joueur_actif]["bonus_tour_suivant"]
@@ -147,33 +163,66 @@ def jeu():
 
             if event.type in (pg.MOUSEBUTTONDOWN, pg.MOUSEBUTTONUP, pg.MOUSEMOTION):
                 mouse_pos = pg.mouse.get_pos()
+
                 if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+
                     if menu_actif:
+
                         if btn_quitter_jeu and btn_quitter_jeu.collidepoint(mouse_pos):
                             retour_menu = True
                             running = False
+
                         elif btn_fermer_menu and btn_fermer_menu.collidepoint(mouse_pos):
                             menu_actif = False
                             start_time = pg.time.get_ticks() - (duree_tour - chrono_en_pause) * 1000
+
                             if pause_start is not None:
                                 pause_offset += pg.time.get_ticks() - pause_start
                                 pause_start = None
+
                     else:
+
                         if btn_menu.collidepoint(mouse_pos):
                             menu_actif = True
                             chrono_en_pause = chrono
                             pause_start = pg.time.get_ticks()
+
                         elif btn_skip.collidepoint(mouse_pos):
                             joueur_actif = 2 if joueur_actif == 1 else 1
                             interface.joueurs[joueur_actif]["tickets"] += 2 + interface.joueurs[joueur_actif]["bonus_tour_suivant"]
                             interface.joueurs[joueur_actif]["bonus_tour_suivant"] = 0
                             start_time = pg.time.get_ticks()
                             chrono = duree_tour
+
                         elif btn_bonus.collidepoint(mouse_pos):
                             joueur = interface.joueurs[joueur_actif]
                             if joueur["points"] >= 100:
                                 joueur["points"] -= 100
                                 joueur["bonus_tour_suivant"] += 1
+
+                        elif btn_creer_unite.collidepoint(mouse_pos) and not mode_creation_unite:                                       ##########
+                            joueur = interface.joueurs[joueur_actif]
+                            if joueur["points"] >= 500:
+                                joueur["points"] -= 500
+                                mode_creation_unite = True
+
+                        elif mode_creation_unite:                                                                                       ##########
+                            # Vérifie si clic sur case appartenant au joueur actif est vide
+                            mx, my = mouse_pos
+                            grid_i = (my - offset_y) // taille
+                            grid_j = (mx - offset_x) // taille
+                            nrows = len(grid_points)
+                            ncols = len(grid_points[0])
+                            if 0 <= grid_i < nrows and 0 <= grid_j < ncols:
+                                idx_case = grid_i * ncols + grid_j
+                                rect, couleur, owner, cell, is_terrain = case_original[idx_case]
+                                if owner == joueur_actif and not is_terrain:
+                                    # Vérifie si aucune unité est déjà là
+                                    deja_unite = any((grid_i, grid_j) in positions for positions in unites.values())
+                                    if not deja_unite:
+                                        unites[joueur_actif].append((grid_i, grid_j))
+                                        mode_creation_unite = False
+                        
                         else:
                             handle_unit_events(event, unites, joueur_actif, interface,
                                                offset_x, offset_y, taille, grid_points, case_original, terrain_grid)
@@ -187,16 +236,19 @@ def jeu():
         if not menu_actif:
             elapsed = (pg.time.get_ticks() - start_time) / 1000
             chrono = max(0, duree_tour - int(elapsed))
+
             if elapsed >= duree_tour:
                 joueur_actif = 2 if joueur_actif == 1 else 1
                 interface.joueurs[joueur_actif]["tickets"] += 2 + interface.joueurs[joueur_actif]["bonus_tour_suivant"]
                 interface.joueurs[joueur_actif]["bonus_tour_suivant"] = 0
                 start_time = pg.time.get_ticks()
+
         else:
             chrono = chrono_en_pause
 
         if pause_start is not None:
             elapsed_partie = int(pause_start - start_partie - pause_offset) // 1000
+
         else:
             elapsed_partie = int(pg.time.get_ticks() - start_partie - pause_offset) // 1000
 
@@ -219,6 +271,7 @@ def jeu():
         if pos_joueur_1:
             i, j = pos_joueur_1
             pg.draw.rect(screen, (70, 130, 180), (offset_x + j*taille, offset_y + i*taille, taille, taille))
+
         if pos_joueur_2:
             i, j = pos_joueur_2
             pg.draw.rect(screen, (178, 34, 3), (offset_x + j*taille, offset_y + i*taille, taille, taille))
@@ -252,19 +305,46 @@ def jeu():
                 btn_bonus.topright = (largeur - 50, hauteur//2 - 30)
 
             pg.draw.rect(screen, VERT, btn_bonus, border_radius=12)
-            txt_bonus = font_bouton.render("+1 Ticket", True, BLANC)
+            txt_bonus = font_bouton.render("+1 ticket", True, BLANC)
             screen.blit(txt_bonus, (btn_bonus.centerx - txt_bonus.get_width()//2,
                                     btn_bonus.centery - txt_bonus.get_height()//2))
+
+
+            if joueur_actif == 1:                                                           ##########
+                btn_creer_unite.topleft = (50, hauteur//2 + 50)
+
+            else:
+                btn_creer_unite.topright = (largeur - 50, hauteur//2 + 50)
+            
+            pg.draw.rect(screen, (100, 100, 255), btn_creer_unite, border_radius=12)
+            txt_creer = font_bouton.render("+1 unité", True, BLANC)
+            screen.blit(txt_creer, (btn_creer_unite.centerx - txt_creer.get_width()//2,
+                                    btn_creer_unite.centery - txt_creer.get_height()//2))
 
         if menu_actif:
             btn_quitter_jeu, btn_fermer_menu = afficher_menu()
 
+        if mode_creation_unite:                                                            ##########
+            mx, my = pg.mouse.get_pos()
+            grid_i = (my - offset_y) // taille
+            grid_j = (mx - offset_x) // taille
+            nrows = len(grid_points)
+            ncols = len(grid_points[0])
+            
+            if 0 <= grid_i < nrows and 0 <= grid_j < ncols:
+                x = offset_x + grid_j * taille + (taille * 0.15)
+                y = offset_y + grid_i * taille + (taille * 0.15)
+                unite_size = int(taille * 0.7)
+                pg.draw.rect(screen, interface.joueurs[joueur_actif]["color"],
+                             (x, y, unite_size, unite_size), 2)
+
         pg.display.flip()
 
     return retour_menu
-# ------------------------------------------------- #
+# ------------------------------------------------------- #
 
-# ----------------- MAIN ----------------- #
+
+# ------------------------ MAIN ------------------------- #
 while True:
     page_accueil()
     retour = jeu()
@@ -273,4 +353,5 @@ while True:
 
 pg.quit()
 sys.exit()
-# ---------------------------------------- #
+# ------------------------------------------------------- #
+
