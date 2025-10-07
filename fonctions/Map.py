@@ -391,19 +391,32 @@ def draw_units(screen, unites, interface, offset_x, offset_y, taille):
 
 def draw_murailles(screen, murailles, case_original, ncols):
     gris = (100, 100, 100)
+    epaisseur = 6  # épaisseur du mur
+
     for (i, j), (ni, nj) in murailles:
-        # Récupère les rects des deux cases
         rect1 = case_original[i * ncols + j][0]
-        rect2 = case_original[ni * ncols + nj][0]
 
-        # Milieux des cases
-        x1, y1 = rect1.center
-        x2, y2 = rect2.center
+        # Mur vers le haut
+        if ni == i - 1 and nj == j:
+            start = (rect1.left, rect1.top)
+            end = (rect1.right, rect1.top)
+        # Mur vers le bas
+        elif ni == i + 1 and nj == j:
+            start = (rect1.left, rect1.bottom)
+            end = (rect1.right, rect1.bottom)
+        # Mur vers la gauche
+        elif ni == i and nj == j - 1:
+            start = (rect1.left, rect1.top)
+            end = (rect1.left, rect1.bottom)
+        # Mur vers la droite
+        elif ni == i and nj == j + 1:
+            start = (rect1.right, rect1.top)
+            end = (rect1.right, rect1.bottom)
+        else:
+            # au cas où un mur diagonal serait ajouté par erreur
+            continue
 
-        # Trace un trait gris plus épais
-        pg.draw.line(screen, gris, (x1, y1), (x2, y2), 6)
-
-
+        pg.draw.line(screen, gris, start, end, epaisseur)
 
 
 def draw_arrow(screen, start_pos, end_pos, color=(255,255,0)):
