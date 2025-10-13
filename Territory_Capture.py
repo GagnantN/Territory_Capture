@@ -37,7 +37,7 @@ btn_quitter = pg.Rect(largeur//2 - 100, hauteur//2 + 60, 200, 80)
 btn_menu = pg.Rect(20, 20, 120, 50)
 btn_skip = pg.Rect(largeur//2 - 150, hauteur - 70, 300, 60)
 btn_bonus = pg.Rect(0, 0, 250, 60)
-btn_creer_unite = pg.Rect(0, 0, 250, 60)                            ######
+btn_creer_unite = pg.Rect(0, 0, 250, 60)
 # ------------------------------------------------------- #
 
 
@@ -156,6 +156,7 @@ def jeu():
 
                 if event.key == pg.K_SPACE and not menu_actif:
                     joueur_actif = 2 if joueur_actif == 1 else 1
+                    mode_creation_unite = False                                                                         ###############
                     interface.joueurs[joueur_actif]["tickets"] += 2 + interface.joueurs[joueur_actif]["bonus_tour_suivant"]
                     interface.joueurs[joueur_actif]["bonus_tour_suivant"] = 0
                     start_time = pg.time.get_ticks()
@@ -189,6 +190,7 @@ def jeu():
 
                         elif btn_skip.collidepoint(mouse_pos):
                             joueur_actif = 2 if joueur_actif == 1 else 1
+                            mode_creation_unite = False                                                                             ###############
                             interface.joueurs[joueur_actif]["tickets"] += 2 + interface.joueurs[joueur_actif]["bonus_tour_suivant"]
                             interface.joueurs[joueur_actif]["bonus_tour_suivant"] = 0
                             start_time = pg.time.get_ticks()
@@ -200,13 +202,13 @@ def jeu():
                                 joueur["points"] -= 100
                                 joueur["bonus_tour_suivant"] += 1
 
-                        elif btn_creer_unite.collidepoint(mouse_pos) and not mode_creation_unite:                                       ##########
+                        elif btn_creer_unite.collidepoint(mouse_pos) and not mode_creation_unite:
                             joueur = interface.joueurs[joueur_actif]
                             if joueur["points"] >= 500:
                                 joueur["points"] -= 500
                                 mode_creation_unite = True
 
-                        elif mode_creation_unite:                                                                                       ##########
+                        elif mode_creation_unite:
                             # Vérifie si clic sur case appartenant au joueur actif est vide
                             mx, my = mouse_pos
                             grid_i = (my - offset_y) // taille
@@ -239,6 +241,7 @@ def jeu():
 
             if elapsed >= duree_tour:
                 joueur_actif = 2 if joueur_actif == 1 else 1
+                mode_creation_unite = False
                 interface.joueurs[joueur_actif]["tickets"] += 2 + interface.joueurs[joueur_actif]["bonus_tour_suivant"]
                 interface.joueurs[joueur_actif]["bonus_tour_suivant"] = 0
                 start_time = pg.time.get_ticks()
@@ -310,7 +313,7 @@ def jeu():
                                     btn_bonus.centery - txt_bonus.get_height()//2))
 
 
-            if joueur_actif == 1:                                                           ##########
+            if joueur_actif == 1:
                 btn_creer_unite.topleft = (50, hauteur//2 + 50)
 
             else:
@@ -324,7 +327,7 @@ def jeu():
         if menu_actif:
             btn_quitter_jeu, btn_fermer_menu = afficher_menu()
 
-        if mode_creation_unite:                                                            ##########
+        if mode_creation_unite:
             mx, my = pg.mouse.get_pos()
             grid_i = (my - offset_y) // taille
             grid_j = (mx - offset_x) // taille
