@@ -7,6 +7,12 @@ clock = pg.time.Clock()
 
 # ------------------------ ECRAN ------------------------ #
 screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
+largeur, hauteur = screen.get_size()
+
+# Fond d'écran principal
+background_image = pg.image.load("Images/Principal.png").convert()
+background_image = pg.transform.scale(background_image, (largeur, hauteur))
+
 for key, surf in textures.items():
     textures[key] = surf.convert()
 
@@ -78,9 +84,11 @@ def page_accueil():
                     pg.quit()
                     sys.exit()
 
-        screen.fill(BLANC)
-        titre = font_titre.render("Territory Capture", True, NOIR)
-        screen.blit(titre, (largeur//2 - titre.get_width()//2, 100))
+        # screen.fill(BLANC)
+        screen.blit(background_image, (0, 0))
+
+        # titre = font_titre.render("Territory Capture", True, NOIR)
+        # screen.blit(titre, (largeur//2 - titre.get_width()//2, 100))
 
         pg.draw.rect(screen, BLEU, btn_jouer, border_radius=15)
         txt_jouer = font_bouton.render("Jouer", True, BLANC)
@@ -319,10 +327,23 @@ def jeu():
             else:
                 btn_creer_unite.topright = (largeur - 50, hauteur//2 + 50)
             
-            pg.draw.rect(screen, (100, 100, 255), btn_creer_unite, border_radius=12)
+
+            # ----- Bouton unité ----- 
+            if mode_creation_unite:
+                # Bouton actif : fond gris + bordure bleue
+                pg.draw.rect(screen, (60, 60, 60), btn_creer_unite, border_radius=12)
+                pg.draw.rect(screen, BLEU, btn_creer_unite, width=3, border_radius=12)
+
+            else: 
+                # Bouton normal
+                pg.draw.rect(screen, (100, 100, 255), btn_creer_unite, border_radius=12)
+
             txt_creer = font_bouton.render("+1 unité", True, BLANC)
             screen.blit(txt_creer, (btn_creer_unite.centerx - txt_creer.get_width()//2,
                                     btn_creer_unite.centery - txt_creer.get_height()//2))
+
+
+
 
         if menu_actif:
             btn_quitter_jeu, btn_fermer_menu = afficher_menu()
