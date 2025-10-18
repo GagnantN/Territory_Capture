@@ -147,6 +147,11 @@ def jeu():
 
             if event.type in (pg.MOUSEBUTTONDOWN, pg.MOUSEBUTTONUP, pg.MOUSEMOTION):
                 mouse_pos = pg.mouse.get_pos()
+
+                # Drag & drop unit events
+                handle_unit_events(event, unites, joueur_actif, interface,
+                                   offset_x, offset_y, taille, grid_points, case_original, terrain_grid)
+                
                 if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                     if menu_actif:
                         if btn_quitter_jeu and btn_quitter_jeu.collidepoint(mouse_pos):
@@ -175,14 +180,10 @@ def jeu():
                                 joueur["points"] -= 100
                                 joueur["bonus_tour_suivant"] += 1
                         else:
-                            handle_unit_events(event, unites, joueur_actif, interface,
-                                               offset_x, offset_y, taille, grid_points, case_original, terrain_grid)
                             handle_click(mouse_pos, case_original, joueur_actif, interface.joueurs,
                                          taille, offset_x, offset_y, grid_points, joueurs_data)
 
-                # Drag & drop unit events
-                handle_unit_events(event, unites, joueur_actif, interface,
-                                   offset_x, offset_y, taille, grid_points, case_original, terrain_grid)
+
 
         if not menu_actif:
             elapsed = (pg.time.get_ticks() - start_time) / 1000

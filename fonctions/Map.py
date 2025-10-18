@@ -1,13 +1,28 @@
 import pygame as pg, sys
 import random
 import os
-from fonctions.cases import terrains, get_reachable_cells, find_path
+from fonctions.cases import terrains, get_reachable_cells, bfs_path
 
 # ----------------- COULEUR JOUEURS --------------------- #
 joueur_01 = (70, 130, 180)   # Bleu acier
 joueur_02 = (178, 34, 3)     # Rouge brique
 central_color = (255, 165, 0)
 muraille_color = (100, 100, 100)  # gris foncé
+# ------------------------------------------------------- #
+
+#  ----------------- VILLE CENTRALE -------------------- #
+# Coordonnées de la case centrale (à adapter à ta carte)
+ville_centrale = (10, 10)
+
+# Liste ou set de toutes les cases intérieures de la ville
+cases_ville_interieure = [
+    (9, 9), (9, 10), (9, 11),
+    (10, 9), (10, 10), (10, 11),
+    (11, 9), (11, 10), (11, 11)
+]
+
+# Qui possède actuellement la ville (None au départ)
+proprietaire_ville = None
 # ------------------------------------------------------- #
 
 # Déplacements d’unités
@@ -271,7 +286,12 @@ def darker_color(color, factor=0.6):
 def handle_unit_events(event, unites, joueur_actif, interface,
                        offset_x, offset_y, taille, grid_points, case_original, terrain_grid):
     """
-    Sélection et déplacement des unités du joueur actif.
+    Gère la sélection et le déplacement des unités du joueur actif.
+    Inclut :
+    - Sélection avec clic gauche
+    - Drag & drop avec limite de distance
+    - Validation du chemin avec BFS
+    - Blocage des terrains et murailles
     """
     global selected_unit, reachable_cells, current_path, animating_move, dragging
 
@@ -279,6 +299,14 @@ def handle_unit_events(event, unites, joueur_actif, interface,
     mouse_x, mouse_y = pg.mouse.get_pos()
     grid_i = (mouse_y - offset_y) // taille
     grid_j = (mouse_x - offset_x) // taille
+
+    # --- Clic droit : annuler sélection ---
+    if event.type == pg.MOUSEBUTTONDOWN and event.button == 3:
+        selected_unit = None
+        dragging = False
+        reachable_cells = []
+        current_path = []
+        return True
 
     # --- Clic gauche pressé : sélection de l'unité ---
     if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
@@ -292,12 +320,22 @@ def handle_unit_events(event, unites, joueur_actif, interface,
                     if interface.joueurs[joueur_actif]["tickets"] >= 1:
                         selected_unit = (joueur_actif, idx)
 
-                        # ==> calcul correct des cellules atteignables :
-                        # on passe grid_points (dimension) et on interdit les terrains (terrains.values()).
-                        forbidden = list(terrains.values()) + [muraille_color]
-                        reachable_cells = set(get_reachable_cells((i, j), 5, grid_points, forbidden, case_original, murailles))
+                        # --- Définir les cases interdites ---
+                        forbidden = get_forbidden_cells(terrain_grid, murailles)
+                        nrows, ncols = len(terrain_grid), len(terrain_grid[0])
+                        # Ajouter terrains
+                        for ii in range(nrows):
+                            for jj in range(ncols):
+                                if terrain_grid[ii][jj] in terrains.values():
+                                    forbidden.add((ii,jj))
+                        # Ajouter murailles
+                        for (i1,j1),(i2,j2) in murailles:
+                            forbidden.add((i1,j1))
+                            forbidden.add((i2,j2))
 
-                        current_path = [(i, j)]
+                        # --- Calcul des cellules atteignables ---
+                        reachable_cells = set(get_reachable_cells((i, j), 5, grid_points, forbidden, case_original, murailles))
+                        current_path = [(i,j)]
                         dragging = True
                         return True
 
@@ -310,13 +348,12 @@ def handle_unit_events(event, unites, joueur_actif, interface,
             if abs(grid_i - last_i) + abs(grid_j - last_j) == 1:  # case adjacente
                 # --- Si on revient en arrière ---
                 if len(current_path) > 1 and (grid_i, grid_j) == current_path[-2]:
-                    current_path.pop()  # on enlève la dernière case
+                    current_path.pop()
                     return True
 
                 # --- Sinon on avance ---
                 if (grid_i, grid_j) not in current_path and (grid_i, grid_j) in reachable_cells:
-                    # Limite de 5 mouvements (donc 6 cases dans current_path)
-                    if len(current_path) < 6:
+                    if len(current_path) < 6:  # limite distance
                         current_path.append((grid_i, grid_j))
         return True
 
@@ -324,24 +361,61 @@ def handle_unit_events(event, unites, joueur_actif, interface,
     if event.type == pg.MOUSEBUTTONUP and event.button == 1 and dragging:
         if selected_unit and len(current_path) > 1:
             joueur_id, idx = selected_unit
-            animating_move = (joueur_id, idx, current_path, 0)
-            interface.joueurs[joueur_id]["tickets"] -= 1
-        # Reset sélection
-        selected_unit = None
-        dragging = False
-        reachable_cells = []
-        current_path = []
-        return True
+            start = current_path[0]
+            goal = current_path[-1]
+            nrows = len(terrain_grid)
+            ncols = len(terrain_grid[0])
 
-    # --- Clic droit : annuler sélection ---
-    if event.type == pg.MOUSEBUTTONDOWN and event.button == 3:
-        selected_unit = None
-        dragging = False
-        reachable_cells = []
-        current_path = []
-        return True
+            # --- Construire forbidden pour BFS ---
+            forbidden = set()
+            for ii in range(nrows):
+                for jj in range(ncols):
+                    if terrain_grid[ii][jj] in terrains.values():
+                        forbidden.add((ii,jj))
+            for (i1,j1),(i2,j2) in murailles:
+                forbidden.add((i1,j1))
+                forbidden.add((i2,j2))
 
-    return False
+            # --- Calcul du chemin via BFS ---
+            path = bfs_path(start, goal, forbidden, nrows, ncols)
+
+            if path:
+                animating_move = (joueur_id, idx, path, 0)
+                interface.joueurs[joueur_id]["tickets"] -= 1
+
+                # --- Vérifie si la destination est la case centrale de la ville ---
+                if goal == ville_centrale:
+                    global proprietaire_ville
+                    ancien_proprietaire = proprietaire_ville  # variable globale ou stockée dans interface
+                    proprietaire_ville = joueur_id
+
+                    # --- Changer la couleur de toutes les cases intérieures ---
+                    for (vi, vj) in cases_ville_interieure:
+                        idx_case = vi * len(terrain_grid[0]) + vj
+                        rect, _, _, cell, is_terrain = case_original[idx_case]
+                        new_color = interface.joueurs[joueur_id]["color"]
+                        case_original[idx_case] = make_case(rect, new_color, joueur_id, cell, taille, is_terrain=False)
+
+                    # --- Donner des points en fonction de la situation ---
+                    if ancien_proprietaire is None:
+                        interface.joueurs[joueur_id]["points"] += 250
+                    elif ancien_proprietaire != joueur_id:
+                        interface.joueurs[joueur_id]["points"] += 200
+
+                    print(f"🏰 Joueur {joueur_id+1} a capturé la ville centrale !")
+
+
+            else:
+                print("Aucun chemin trouvé : muraille ou obstacle bloquant")
+
+    # --- Reset sélection ---
+    selected_unit = None
+    dragging = False
+    reachable_cells = []
+    current_path = []
+    return True
+
+
 
 
 def draw_units(screen, unites, interface, offset_x, offset_y, taille):
@@ -527,3 +601,15 @@ def construire_muraille_autour(murailles, ci, cj, taille_zone=3):
             murailles.add(((i, min_j), (i, min_j-1)))  # mur gauche
             murailles.add(((i, max_j), (i, max_j+1)))  # mur droite
 
+
+def get_forbidden_cells(terrain_grid, murailles):
+    forbidden = set()
+    nrows, ncols = len(terrain_grid), len(terrain_grid[0])
+    for ii in range(nrows):
+        for jj in range(ncols):
+            if terrain_grid[ii][jj] in terrains.values():
+                forbidden.add((ii, jj))
+    for (a,b),(c,d) in murailles:
+        forbidden.add((a,b))
+        forbidden.add((c,d))
+    return forbidden
