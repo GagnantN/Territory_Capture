@@ -383,6 +383,8 @@ def jeu():
                 # Affichage à gauche pour joueur 2
                 btn_unite_prix.x -= btn_unite_prix.width + 20
 
+
+
             pg.draw.rect(screen, (80, 80, 80), btn_unite_prix, border_radius=12)
             txt_prix_unite = font_prix.render("500 pts", True, BLANC)
             screen.blit(txt_prix_unite, (btn_unite_prix.centerx - txt_prix_unite.get_width()//2,
