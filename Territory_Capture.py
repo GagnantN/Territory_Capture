@@ -34,6 +34,7 @@ VERT = (50, 200, 50)
 font_titre = pg.font.SysFont("arial", 60, bold=True)
 font_bouton = pg.font.SysFont("arial", 40)
 font_timer = pg.font.SysFont("arial", 48, bold=True)
+font_prix = pg.font.SysFont("arial", 28, bold=False)
 # ------------------------------------------------------- #
 
 
@@ -315,10 +316,21 @@ def jeu():
             else:
                 btn_bonus.topright = (largeur - 50, hauteur//2 - 30)
 
+
+            # Affichage Bouton (+1 tickets)
             pg.draw.rect(screen, VERT, btn_bonus, border_radius=12)
             txt_bonus = font_bouton.render("+1 ticket", True, BLANC)
             screen.blit(txt_bonus, (btn_bonus.centerx - txt_bonus.get_width()//2,
                                     btn_bonus.centery - txt_bonus.get_height()//2))
+            
+            # Affichage (100 pts)
+            btn_bonus_prix = btn_bonus.copy()
+            btn_bonus_prix.width //= 2 # Moitié de la largeur
+            btn_bonus_prix.x += btn_bonus.width +20 # Décalage horiozontal
+            pg.draw.rect(screen, (80, 80, 80), btn_bonus_prix, border_radius=12)
+            txt_prix_bonus = font_prix.render("100 pts", True, BLANC)
+            screen.blit(txt_prix_bonus, (btn_bonus_prix.centerx - txt_prix_bonus.get_width()//2,
+                             btn_bonus_prix.centery - txt_prix_bonus.get_height()//2))
 
 
             if joueur_actif == 1:
@@ -338,11 +350,20 @@ def jeu():
                 # Bouton normal
                 pg.draw.rect(screen, (100, 100, 255), btn_creer_unite, border_radius=12)
 
+
+            # Affichage Bouton (+1 unité)
             txt_creer = font_bouton.render("+1 unité", True, BLANC)
             screen.blit(txt_creer, (btn_creer_unite.centerx - txt_creer.get_width()//2,
                                     btn_creer_unite.centery - txt_creer.get_height()//2))
 
-
+            # Affichage (500 pts)
+            btn_unite_prix = btn_creer_unite.copy()
+            btn_bonus_prix.width //= 2 # Moitié de la largeur
+            btn_unite_prix.x += btn_creer_unite.width + 20 # Décalage horiozontal
+            pg.draw.rect(screen, (80, 80, 80), btn_unite_prix, border_radius=12)
+            txt_prix_unite = font_prix.render("500 pts", True, BLANC)
+            screen.blit(txt_prix_unite, (btn_unite_prix.centerx - txt_prix_unite.get_width()//2,
+                                        btn_unite_prix.centery - txt_prix_unite.get_height()//2))
 
 
         if menu_actif:
