@@ -326,7 +326,15 @@ def jeu():
             # Affichage (100 pts)
             btn_bonus_prix = btn_bonus.copy()
             btn_bonus_prix.width //= 2 # Moitié de la largeur
-            btn_bonus_prix.x += btn_bonus.width +20 # Décalage horiozontal
+
+            if joueur_actif == 1:
+                # Affichage à droite pour joueur 1
+                btn_bonus_prix.x += btn_bonus.width +20 # Décalage horiozontal
+
+            else:
+                # Prix à gauche pour joueur 2
+                btn_bonus_prix.x -= btn_bonus_prix.width + 20
+
             pg.draw.rect(screen, (80, 80, 80), btn_bonus_prix, border_radius=12)
             txt_prix_bonus = font_prix.render("100 pts", True, BLANC)
             screen.blit(txt_prix_bonus, (btn_bonus_prix.centerx - txt_prix_bonus.get_width()//2,
@@ -352,14 +360,29 @@ def jeu():
 
 
             # Affichage Bouton (+1 unité)
+            if mode_creation_unite:
+                pg.draw.rect(screen, (60, 60, 60), btn_creer_unite, border_radius=12)
+                pg.draw.rect(screen, BLEU, btn_creer_unite, width=3, border_radius=12)
+
+            else:
+                pg.draw.rect(screen, (100, 100, 255), btn_creer_unite, border_radius=12)
+
             txt_creer = font_bouton.render("+1 unité", True, BLANC)
             screen.blit(txt_creer, (btn_creer_unite.centerx - txt_creer.get_width()//2,
                                     btn_creer_unite.centery - txt_creer.get_height()//2))
 
             # Affichage (500 pts)
             btn_unite_prix = btn_creer_unite.copy()
-            btn_bonus_prix.width //= 2 # Moitié de la largeur
-            btn_unite_prix.x += btn_creer_unite.width + 20 # Décalage horiozontal
+            btn_unite_prix.width //= 2 # Moitié de la largeur
+
+            if joueur_actif == 1:
+                # Affichage à droite pour joueur 1
+                btn_unite_prix.x += btn_creer_unite.width + 20
+
+            else:
+                # Affichage à gauche pour joueur 2
+                btn_unite_prix.x -= btn_unite_prix.width + 20
+
             pg.draw.rect(screen, (80, 80, 80), btn_unite_prix, border_radius=12)
             txt_prix_unite = font_prix.render("500 pts", True, BLANC)
             screen.blit(txt_prix_unite, (btn_unite_prix.centerx - txt_prix_unite.get_width()//2,
