@@ -128,18 +128,23 @@ def page_accueil():
 
 
 # --------------------- PAGE REGLES --------------------- #
+'''
+Cette fonction gère l'affichage du tutoriel.
+'''
+
 def afficher_regles():
     pages = [
+        # Page n°1 -----
         ["Bienvenue dans le tutoriel !", 
          "Cette section explique les bases du jeu."],
 
-        # ----------
+        # Page n°2 -----
         ["Tickets & Unités", 
          "",
          "  - Les tickets servent à déplacer des unités",
          "  --> 1 tickets = déplacement de 5 cases (pour une unité) ou 1 case (hors unité)"],
 
-        # ----------
+        # Page n°3 -----
         ["Les Points", 
          "",
          "  - Ils servent à obtenir des tickets ou créer des unités"
@@ -149,7 +154,7 @@ def afficher_regles():
          "  - le bouton '+1 ticket' vous coûtera 100 points, mais vous commencerez la partie d'après avec 1 tickets de plus",
          "  --> Vous pouvez utiliser plusieurs boutons dans la même partie"],
 
-        # ----------
+        # Page n°4 -----
          ["Le But ?", 
           "",
          "  - Capturer le plus de cases possibles avant la fin de la partie (10min)",
@@ -159,7 +164,7 @@ def afficher_regles():
          "Attention !",
          "  - Si un joueur n'a plus d'unité, il a perdu",],
 
-        # ----------
+        # Page n°5 -----
         ["À noter :", 
           "",
           "  - Chaque tour dure 30 secondes",
@@ -170,7 +175,7 @@ def afficher_regles():
          "",
          "  - Appuyez sur la touche ESC pour mettre le jeu en pause ou revenir au menu"],
 
-        # ----------
+        # Page n°6 -----
         ["Un conseil ?", 
           "",
          "  - Utilisez vos tickets avec stratégie,",
@@ -179,33 +184,54 @@ def afficher_regles():
          "    Et surtout, protégez vos unités et vos zones de spawn !",]
     ]
     
-    index_page = 0
-    en_cours = True
+    index_page = 0 # index de la page actuelle
+    en_cours = True # Booléen pour savoir si le tutoriel est ouvert
 
     # Boutons
     btn_quitter = pg.Rect(largeur - 140, 20, 120, 50)
     btn_suivant = pg.Rect(largeur - 180, hauteur - 80, 160, 60)
     btn_precedent = pg.Rect(20, hauteur - 80, 160, 60)
 
+
     while en_cours:
-        for event in pg.event.get():
+        for event in pg.event.get(): # gestion des évènements Pygae
+            # Quitter le jeu si l'utilisateur ferme la fenêtre
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
+            
+            # Gestion des clics souris
             elif event.type == pg.MOUSEBUTTONDOWN:
+                # Quitter le tutoriel si le bouton 'X' est cliqué
                 if btn_quitter.collidepoint(event.pos):
                     en_cours = False
+                
+                # Page suivante si le bouton 'Suivant' est cliqué
                 elif btn_suivant.collidepoint(event.pos) and index_page < len(pages) - 1:
                     index_page += 1
+                # Page précédente si le bouton 'Précédent' est cliqué
                 elif btn_precedent.collidepoint(event.pos) and index_page > 0:
                     index_page -= 1
+
+            # Gestion des touches clavier
             elif event.type == pg.KEYDOWN:
+                # Quitter le tutoriel
                 if event.key == pg.K_ESCAPE:
-                    en_cours = False  # Quitter le tutoriel
+                    en_cours = False
+
+                # Flèche droite : page suivante
+                elif event.key == pg.K_RIGHT:
+                    if index_page < len(pages) - 1:
+                        index_page += 1
+
+                # Flèche gauche : page précédente
+                elif event.key == pg.K_LEFT:
+                    if index_page > 0:
+                        index_page -= 1
 
         screen.fill((24, 26, 32))  # Fond sombre
 
-        # --- Affichage du titre de la page ---
+        # --- Affichage du titre de la page centré ---
         titre = font_titre.render(f"Page {index_page + 1}", True, JAUNE)
         screen.blit(titre, (largeur//2 - titre.get_width()//2, 20))
 
@@ -217,14 +243,17 @@ def afficher_regles():
 
         # Bouton Quitter
         pg.draw.rect(screen, ROUGE, btn_quitter, border_radius=10)
-        txt_quitter = font_bouton.render("Quitter", True, BLANC)
+        txt_quitter = font_bouton.render("X", True, BLANC)
         screen.blit(txt_quitter, (btn_quitter.centerx - txt_quitter.get_width()//2,
                                   btn_quitter.centery - txt_quitter.get_height()//2))
 
         # Bouton Suivant
-        couleur_suivant = BLEU if index_page < len(pages) - 1 else GRIS
-        if btn_suivant.collidepoint(pg.mouse.get_pos()):
-            couleur_suivant = (70, 130, 180)
+        if index_page < len(pages) - 1:
+            couleur_suivant = BLEU
+            if btn_suivant.collidepoint(pg.mouse.get_pos()):
+                couleur_suivant = (70, 130, 180)
+        else:
+            couleur_suivant = GRIS  # reste gris si inactif
         pg.draw.rect(screen, couleur_suivant, btn_suivant, border_radius=10)
         txt_suivant = font_bouton.render("-->", True, BLANC)
         screen.blit(txt_suivant, (btn_suivant.centerx - txt_suivant.get_width()//2,
@@ -232,9 +261,12 @@ def afficher_regles():
         
 
         # Bouton Précédent
-        couleur_precedent = BLEU if index_page > 0 else GRIS
-        if btn_precedent.collidepoint(pg.mouse.get_pos()):
-            couleur_precedent = (70, 130, 180)
+        if index_page > 0:
+            couleur_precedent = BLEU
+            if btn_precedent.collidepoint(pg.mouse.get_pos()):
+                couleur_precedent = (70, 130, 180)
+        else:
+            couleur_precedent = GRIS  # reste gris si inactif
         pg.draw.rect(screen, couleur_precedent, btn_precedent, border_radius=10)
         txt_precedent = font_bouton.render("<--", True, BLANC)
         screen.blit(txt_precedent, (btn_precedent.centerx - txt_precedent.get_width()//2,
