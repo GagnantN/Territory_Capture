@@ -154,7 +154,7 @@ def afficher_regles():
         pg.mixer.music.load(os.path.join("music", "regle.mp3"))  # chemin du fichier
         pg.mixer.music.set_volume(0.3)  # volume entre 0.0 et 1.0
         pg.mixer.music.play(-1)  # -1 = en boucle
-        print("🎵 Musique de jeu lancée !")
+        print("🎵 Musique des regles lancée !")
     except Exception as e:
         print(f"⚠️ Erreur musique : {e}")
 
