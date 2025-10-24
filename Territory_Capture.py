@@ -133,11 +133,13 @@ def afficher_regles():
         ["Bienvenue dans le tutoriel !", 
          "Cette section explique les bases du jeu."],
 
+        # ----------
         ["Tickets & Unités", 
          "",
          "  - Les tickets servent à déplacer des unités",
          "  --> 1 tickets = déplacement de 5 cases (pour une unité) ou 1 case (hors unité)"],
 
+        # ----------
         ["Les Points", 
          "",
          "  - Ils servent à obtenir des tickets ou créer des unités"
@@ -147,6 +149,7 @@ def afficher_regles():
          "  - le bouton '+1 ticket' vous coûtera 100 points, mais vous commencerez la partie d'après avec 1 tickets de plus",
          "  --> Vous pouvez utiliser plusieurs boutons dans la même partie"],
 
+        # ----------
          ["Le But ?", 
           "",
          "  - Capturer le plus de cases possibles avant la fin de la partie (10min)",
@@ -156,26 +159,24 @@ def afficher_regles():
          "Attention !",
          "  - Si un joueur n'a plus d'unité, il a perdu",],
 
-
-        ["Chaque tour dure 30 secondes"
-         "",
-         "Libre à vous de faire la stratégie que vous voulez"
-         "",
-         "En vous arretent au centre de la map, vous obtiendrez directement 500 points (ou 450 si vous la reprenez)"],
-
-        ["Chaque tour dure 30 secondes.", "Appuyez sur ESC pour mettre en pause ou revenir au menu."],
-
-        ["Conseils :", "Utilisez vos tickets avec stratégie.", "Protégez vos unités et vos zones de spawn."],
-
-        ["Pour résumer ?", 
+        # ----------
+        ["À noter :", 
           "",
-         "  - Capture le plus de cases possibles avant la fin de la partie (10min)",
-         "  ou",
-         "  - Atteint le château de l'adversaire !",
+          "  - Chaque tour dure 30 secondes",
          "",
-         "Attention à ne pas perdre ta dernière unité",
+         "  - Libre à vous de faire la stratégie que vous voulez",
          "",
-         "N'oublie pas que tu peux acheter des unités ou des tickets",]
+         "  - En vous arretent au centre de la map, vous obtiendrez directement 500 points (ou 450 si vous la reprenez)",
+         "",
+         "  - Appuyez sur la touche ESC pour mettre le jeu en pause ou revenir au menu"],
+
+        # ----------
+        ["Un conseil ?", 
+          "",
+         "  - Utilisez vos tickets avec stratégie,",
+         "  - N'hesitez pas à dépenser vos points pour les boutons bonus,",
+         "",
+         "    Et surtout, protégez vos unités et vos zones de spawn !",]
     ]
     
     index_page = 0
