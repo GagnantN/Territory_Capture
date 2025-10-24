@@ -51,13 +51,25 @@ class TestMapFunctions(unittest.TestCase):
 
     def run_with_result(self, func):
         """Helper pour exécuter chaque test avec affichage ✅ ou ❌"""
+        # On cherche d'abord la docstring du test principal "test_xxx"
+        test_name = func.__name__.replace("_test_", "test_")
+        public_test = getattr(self, test_name, None)
+
+        # Priorité à la docstring du test public sinon celle de la fonction, sinon nom brut
+        if public_test and public_test.__doc__:
+            doc = public_test.__doc__.strip()
+        elif func.__doc__:
+            doc = func.__doc__.strip()
+        else:
+            doc = func.__name__
+
         try:
             func()
-            print(f"✅ {func.__doc__}")
+            print(f"✅ {doc}")
         except Exception as e:
-            print(f"❌ {func.__doc__} → {e}")
+            print(f"❌ {doc} → {e}")
             traceback.print_exc()
-            raise  # Important pour que unittest signale bien l'échec
+            raise
 
     # --- 🎨 TESTS DES FONCTIONS ---
 
@@ -152,7 +164,6 @@ class TestMapFunctions(unittest.TestCase):
         self.assertEqual(self.joueurs[1]["points"], 10)
 
 
-
 if __name__ == "__main__":
     print("🚀 Lancement des tests unitaires Map.py...\n")
-    unittest.main(verbosity=0)  # On masque le runner standard pour n'afficher que nos ✅ / ❌
+    unittest.main(verbosity=0)
