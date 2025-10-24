@@ -401,12 +401,12 @@ def jeu():
             if joueur_actif == 1:
                 # Affichage à droite pour joueur 1
                 btn_bonus_prix.x += btn_bonus.width +20 # Décalage horiozontal
-                btn_creer_unite.topleft = (50, hauteur//2 + 50)
+                btn_creer_unite.topleft = (50, hauteur//2 + 125)
 
             else:
                 # Affichage à gauche pour joueur 2
                 btn_bonus_prix.x -= btn_bonus_prix.width + 20
-                btn_creer_unite.topright = (largeur - 50, hauteur//2 + 50)
+                btn_creer_unite.topright = (largeur - 50, hauteur//2 + 125)
             # -----------------------------------------------------------------
 
 
