@@ -38,6 +38,9 @@ NOIR = (0, 0, 0)
 BLEU = (0, 120, 215)
 ROUGE = (200, 50, 50)
 VERT = (50, 200, 50)
+
+JAUNE = (255, 200, 0)
+GRIS = (100, 100, 100)
 # ------------------------------------------------------- #
 
 
@@ -47,6 +50,8 @@ font_titre = pg.font.SysFont("arial", 60, bold=True)
 font_bouton = pg.font.SysFont("arial", 40)
 font_timer = pg.font.SysFont("arial", 48, bold=True)
 font_prix = pg.font.SysFont("arial", 28, bold=False)
+
+font_texte = pg.font.SysFont("Arial", 32)
 # ------------------------------------------------------- #
 
 
@@ -124,51 +129,124 @@ def page_accueil():
 
 # --------------------- PAGE REGLES --------------------- #
 def afficher_regles():
-    en_cours = True
-    regles = [
-        "1. Chaque joueur commence avec des 2 tickets et 3 unités.",
-        "",
-        "2. Les tickets servent à déplacer des unités.",
-        "   --> 1 tickets = déplacement de 5 cases pour une unité ou 1 case hors unité",
-        "",
-        "3. Les points servent à obtenir des tickets ou créer des unités.",
-        "",
-        "4. Le but est :",
-        "     - Capturer le plus de cases possibles avant la fin de la partie (10min)",
-        "     ou",
-        "     - Atteindre le château de l'adversaire",
-        "     ou",
-        "     - Si un jour n'a plus d'unité, alors le jour a perdu",
-        "",
-        "5. Chaque tour dure 30 secondes.",
-        "",
-        "6. Appuyez sur ESC pour mettre en pause ou revenir au menu."
-    ]
+    pages = [
+        ["Bienvenue dans le tutoriel !", 
+         "Cette section explique les bases du jeu."],
 
-    btn_retour = pg.Rect(largeur//2 - 100, hauteur - 100, 200, 60)
+        ["Tickets & Unités", 
+         "",
+         "  - Les tickets servent à déplacer des unités",
+         "  --> 1 tickets = déplacement de 5 cases (pour une unité) ou 1 case (hors unité)"],
+
+        ["Les Points", 
+         "",
+         "  - Ils servent à obtenir des tickets ou créer des unités"
+         "",
+         "  - le bouton '+1 ticket' vous coûtera 100 points, mais vous commencerez la partie d'après avec 1 tickets de plus",
+         "",
+         "  - le bouton '+1 ticket' vous coûtera 100 points, mais vous commencerez la partie d'après avec 1 tickets de plus",
+         "  --> Vous pouvez utiliser plusieurs boutons dans la même partie"],
+
+         ["Le But ?", 
+          "",
+         "  - Capturer le plus de cases possibles avant la fin de la partie (10min)",
+         "  ou",
+         "  - Atteindre le château de l'adversaire",
+         "",
+         "Attention !",
+         "  - Si un joueur n'a plus d'unité, il a perdu",],
+
+
+        ["Chaque tour dure 30 secondes"
+         "",
+         "Libre à vous de faire la stratégie que vous voulez"
+         "",
+         "En vous arretent au centre de la map, vous obtiendrez directement 500 points (ou 450 si vous la reprenez)"],
+
+        ["Chaque tour dure 30 secondes.", "Appuyez sur ESC pour mettre en pause ou revenir au menu."],
+
+        ["Conseils :", "Utilisez vos tickets avec stratégie.", "Protégez vos unités et vos zones de spawn."],
+
+        ["Pour résumer ?", 
+          "",
+         "  - Capture le plus de cases possibles avant la fin de la partie (10min)",
+         "  ou",
+         "  - Atteint le château de l'adversaire !",
+         "",
+         "Attention à ne pas perdre ta dernière unité",
+         "",
+         "N'oublie pas que tu peux acheter des unités ou des tickets",]
+    ]
+    
+    index_page = 0
+    en_cours = True
+
+    # Boutons
+    btn_quitter = pg.Rect(largeur - 140, 20, 120, 50)
+    btn_suivant = pg.Rect(largeur - 180, hauteur - 80, 160, 60)
+    btn_precedent = pg.Rect(20, hauteur - 80, 160, 60)
 
     while en_cours:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
-            if event.type == pg.MOUSEBUTTONDOWN:
-                if btn_retour.collidepoint(event.pos):
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if btn_quitter.collidepoint(event.pos):
                     en_cours = False
+                elif btn_suivant.collidepoint(event.pos) and index_page < len(pages) - 1:
+                    index_page += 1
+                elif btn_precedent.collidepoint(event.pos) and index_page > 0:
+                    index_page -= 1
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    en_cours = False  # Quitter le tutoriel
 
-        screen.fill((24, 26, 32))  # Fond
+        screen.fill((24, 26, 32))  # Fond sombre
 
-        for i, ligne in enumerate(regles):
-            txt = font_bouton.render(ligne, True, (255, 255, 255))
-            screen.blit(txt, (50, 50 + i*50))
+        # --- Affichage du titre de la page ---
+        titre = font_titre.render(f"Page {index_page + 1}", True, JAUNE)
+        screen.blit(titre, (largeur//2 - titre.get_width()//2, 20))
 
-        pg.draw.rect(screen, BLEU, btn_retour, border_radius=10)
-        txt_retour = font_bouton.render("Retour", True, (255, 255, 255))
-        screen.blit(txt_retour, (btn_retour.centerx - txt_retour.get_width()//2,
-                                 btn_retour.centery - txt_retour.get_height()//2))
+
+        # Affichage du texte de la page
+        for i, ligne in enumerate(pages[index_page]):
+            txt = font_bouton.render(ligne, True, BLANC)
+            screen.blit(txt, (50, 200 + i * 50))
+
+        # Bouton Quitter
+        pg.draw.rect(screen, ROUGE, btn_quitter, border_radius=10)
+        txt_quitter = font_bouton.render("Quitter", True, BLANC)
+        screen.blit(txt_quitter, (btn_quitter.centerx - txt_quitter.get_width()//2,
+                                  btn_quitter.centery - txt_quitter.get_height()//2))
+
+        # Bouton Suivant
+        couleur_suivant = BLEU if index_page < len(pages) - 1 else GRIS
+        if btn_suivant.collidepoint(pg.mouse.get_pos()):
+            couleur_suivant = (70, 130, 180)
+        pg.draw.rect(screen, couleur_suivant, btn_suivant, border_radius=10)
+        txt_suivant = font_bouton.render("-->", True, BLANC)
+        screen.blit(txt_suivant, (btn_suivant.centerx - txt_suivant.get_width()//2,
+                                   btn_suivant.centery - txt_suivant.get_height()//2))
+        
+
+        # Bouton Précédent
+        couleur_precedent = BLEU if index_page > 0 else GRIS
+        if btn_precedent.collidepoint(pg.mouse.get_pos()):
+            couleur_precedent = (70, 130, 180)
+        pg.draw.rect(screen, couleur_precedent, btn_precedent, border_radius=10)
+        txt_precedent = font_bouton.render("<--", True, BLANC)
+        screen.blit(txt_precedent, (btn_precedent.centerx - txt_precedent.get_width()//2,
+                                     btn_precedent.centery - txt_precedent.get_height()//2))
+
+        # Indicateur de page centré en bas
+        txt_page = font_bouton.render(f"Page {index_page + 1}/{len(pages)}", True, BLANC)
+        screen.blit(txt_page, (largeur // 2 - txt_page.get_width() // 2,
+                               hauteur - txt_page.get_height() - 20))
 
         pg.display.flip()
         clock.tick(60)
+
 # ------------------------------------------------------- #
 # ******************************************************************************************************************* #
 
