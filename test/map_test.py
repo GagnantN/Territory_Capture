@@ -4,19 +4,19 @@ import sys
 import os
 import traceback
 
-# 🧭 On ajoute le dossier racine du projet (Territory_Capture) au sys.path
+#  On ajoute le dossier racine du projet (Territory_Capture) au sys.path
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, ROOT_DIR)
 
-# 🧪 ⚡ On "mock" le chargement des images pour les tests :
+#  On "mock" le chargement des images pour les tests :
 # Cela évite que Pygame cherche les fichiers réels (Eau.png, Foret.png, etc.)
 pg.image.load = lambda path: pg.Surface((10, 10))
 
-# --- 🧱 Initialisation Pygame en mode test ---
+# ---  Initialisation Pygame en mode test ---
 pg.display.init()
 pg.display.set_mode((1, 1))  # fenêtre minimale invisible pour les tests
 
-# --- 🧪 Import des fonctions à tester depuis Map.py ---
+# ---  Import des fonctions à tester depuis Map.py ---
 from fonctions.Map import darker_color, make_case, est_adjacent, get_forbidden_cells, construire_muraille_autour, handle_click
 
 
@@ -71,7 +71,7 @@ class TestMapFunctions(unittest.TestCase):
             traceback.print_exc()
             raise
 
-    # --- 🎨 TESTS DES FONCTIONS ---
+    # ---  TESTS DES FONCTIONS ---
 
     def test_darker_color(self):
         """darker_color : la couleur est bien assombrie"""

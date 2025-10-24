@@ -2,12 +2,14 @@
 import pygame as pg, sys
 from fonctions.Map import create_map, joueur_01, joueur_02, textures, handle_click, afficher_victoire, handle_unit_events, draw_units, update_unit_animation, draw_murailles
 from fonctions.interface_joueurs import affichage_joueurs
+import os
 # ------------------------------------------------------- #
 
 
 
 # ------------------- INITIALISATION -------------------- #
 pg.init() # Pygame
+pg.mixer.init() # Initialisation audio
 clock = pg.time.Clock() # Horloge (gérer les FPS)
 # ------------------------------------------------------- #
 
@@ -86,6 +88,18 @@ Boucle jusqu'à que le joueur clique sur 'Jouer' ou 'Quitter'.
 '''
 
 def page_accueil():
+
+        # ---  MUSIQUE Du Menu --- #
+    try:
+        pg.mixer.music.stop()  # stoppe toute musique précédente (menu par ex.)
+        pg.mixer.music.load(os.path.join("music", "menu.mp3"))  # chemin du fichier
+        pg.mixer.music.set_volume(0.3)  # volume entre 0.0 et 1.0
+        pg.mixer.music.play(-1)  # -1 = en boucle
+        print("🎵 Musique de menu lancée !")
+    except Exception as e:
+        print(f"⚠️ Erreur musique : {e}")
+
+
     en_cours = True
     while en_cours:
         for event in pg.event.get():
@@ -133,6 +147,17 @@ Cette fonction gère l'affichage du tutoriel.
 '''
 
 def afficher_regles():
+
+    # ---  MUSIQUE DES REGLES --- #
+    try:
+        pg.mixer.music.stop()  # stoppe toute musique précédente (menu par ex.)
+        pg.mixer.music.load(os.path.join("music", "regle.mp3"))  # chemin du fichier
+        pg.mixer.music.set_volume(0.3)  # volume entre 0.0 et 1.0
+        pg.mixer.music.play(-1)  # -1 = en boucle
+        print("🎵 Musique de jeu lancée !")
+    except Exception as e:
+        print(f"⚠️ Erreur musique : {e}")
+
     pages = [
         # Page n°1 -----
         ["Bienvenue dans le tutoriel !", 
@@ -323,6 +348,17 @@ Gère la carte, les unités, les tours des joueurs, l'interface, le chronomètre
 def jeu():
     # Création de la map et initialisation des variables du jeu
     BCOLOR, case_original, pos_joueur_1, pos_joueur_2, terrains, taille, offset_x, offset_y, grid_points, joueurs_data, spawn_zone_1, spawn_zone_2, unites, terrain_grid, murailles = create_map(screen)
+
+    # ---  MUSIQUE DE JEU --- #
+    try:
+        pg.mixer.music.stop()  # stoppe toute musique précédente (menu par ex.)
+        pg.mixer.music.load(os.path.join("music", "son.mp3"))  # chemin du fichier
+        pg.mixer.music.set_volume(0.4)  # volume entre 0.0 et 1.0
+        pg.mixer.music.play(-1)  # -1 = en boucle
+        print("🎵 Musique de jeu lancée !")
+    except Exception as e:
+        print(f"⚠️ Erreur musique : {e}")
+
 
     interface = affichage_joueurs(screen, joueur_01, joueur_02)
     mode_creation_unite = False
@@ -654,6 +690,9 @@ def jeu():
 
         pg.display.flip()
 
+    
+    # --- 🔇 Arrêt musique quand on quitte la partie --- #
+    pg.mixer.music.stop()
     return retour_menu
 # ------------------------------------------------------- #
 # ******************************************************************************************************************* #
