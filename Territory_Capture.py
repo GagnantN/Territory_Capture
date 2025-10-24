@@ -52,14 +52,125 @@ font_prix = pg.font.SysFont("arial", 28, bold=False)
 
 
 # ---------------------- BOUTONS ------------------------ #
-btn_jouer = pg.Rect(largeur//2 - 100, hauteur//2 - 40, 200, 80)
-btn_quitter = pg.Rect(largeur//2 - 100, hauteur//2 + 60, 200, 80)
-btn_menu = pg.Rect(20, 20, 120, 50)
+largeur_bouton = 300  # largeur des boutons
+
+# Jouer
+btn_jouer = pg.Rect(largeur//2 - largeur_bouton//2, hauteur//2 - 60, largeur_bouton, 80)
+# Règles du jeu
+btn_regles = pg.Rect(largeur//2 - largeur_bouton//2, hauteur//2 + 30, largeur_bouton, 80)
+# Quitter
+btn_quitter = pg.Rect(largeur//2 - largeur_bouton//2, hauteur//2 + 120, largeur_bouton, 80)
+
+# Menu
+btn_menu = pg.Rect(20, 20, 120, 50)      
+# Passer le tour
 btn_skip = pg.Rect(largeur//2 - 150, hauteur - 70, 300, 60)
+
+# +1 ticket
 btn_bonus = pg.Rect(0, 0, 250, 60)
+# +1 unité
 btn_creer_unite = pg.Rect(0, 0, 250, 60)
 # ------------------------------------------------------- #
 
+
+# ******************************************************************************************************************* #
+# -------------------- PAGE ACCUEIL --------------------- # 
+'''
+Affiche l'écran d'accueil avec les boutons 'Jouer' et 'Quitter'.
+Boucle jusqu'à que le joueur clique sur 'Jouer' ou 'Quitter'.
+'''
+
+def page_accueil():
+    en_cours = True
+    while en_cours:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if btn_jouer.collidepoint(event.pos):
+                    en_cours = False # Lancement du jeu
+                elif btn_quitter.collidepoint(event.pos):
+                    pg.quit()
+                    sys.exit()
+                elif btn_regles.collidepoint(event.pos):
+                    afficher_regles()  # ← Appelle ta fonction qui affiche les règles
+
+        screen.blit(background_image, (0, 0))
+
+        # --- Bouton Jouer ---
+        pg.draw.rect(screen, BLEU, btn_jouer, border_radius=15)
+        txt_jouer = font_bouton.render("Jouer", True, BLANC)
+        screen.blit(txt_jouer, (btn_jouer.centerx - txt_jouer.get_width()//2,
+                                btn_jouer.centery - txt_jouer.get_height()//2))
+        
+        # --- Bouton Règles ---
+        pg.draw.rect(screen, (100, 100, 100), btn_regles, border_radius=15)
+        txt_regles = font_bouton.render("Règles", True, BLANC)
+        screen.blit(txt_regles, (btn_regles.centerx - txt_regles.get_width()//2,
+                                btn_regles.centery - txt_regles.get_height()//2))
+
+        # --- Bouton Quitter ---
+        pg.draw.rect(screen, ROUGE, btn_quitter, border_radius=15)
+        txt_quitter = font_bouton.render("Quitter", True, BLANC)
+        screen.blit(txt_quitter, (btn_quitter.centerx - txt_quitter.get_width()//2,
+                                  btn_quitter.centery - txt_quitter.get_height()//2))
+
+        pg.display.flip()
+        clock.tick(60)
+# ------------------------------------------------------- #
+
+
+
+# --------------------- PAGE REGLES --------------------- #
+def afficher_regles():
+    en_cours = True
+    regles = [
+        "1. Chaque joueur commence avec des 2 tickets et 3 unités.",
+        "",
+        "2. Les tickets servent à déplacer des unités.",
+        "   --> 1 tickets = déplacement de 5 cases pour une unité ou 1 case hors unité",
+        "",
+        "3. Les points servent à obtenir des tickets ou créer des unités.",
+        "",
+        "4. Le but est :",
+        "     - Capturer le plus de cases possibles avant la fin de la partie (10min)",
+        "     ou",
+        "     - Atteindre le château de l'adversaire",
+        "     ou",
+        "     - Si un jour n'a plus d'unité, alors le jour a perdu",
+        "",
+        "5. Chaque tour dure 30 secondes.",
+        "",
+        "6. Appuyez sur ESC pour mettre en pause ou revenir au menu."
+    ]
+
+    btn_retour = pg.Rect(largeur//2 - 100, hauteur - 100, 200, 60)
+
+    while en_cours:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if btn_retour.collidepoint(event.pos):
+                    en_cours = False
+
+        screen.fill((24, 26, 32))  # Fond
+
+        for i, ligne in enumerate(regles):
+            txt = font_bouton.render(ligne, True, (255, 255, 255))
+            screen.blit(txt, (50, 50 + i*50))
+
+        pg.draw.rect(screen, BLEU, btn_retour, border_radius=10)
+        txt_retour = font_bouton.render("Retour", True, (255, 255, 255))
+        screen.blit(txt_retour, (btn_retour.centerx - txt_retour.get_width()//2,
+                                 btn_retour.centery - txt_retour.get_height()//2))
+
+        pg.display.flip()
+        clock.tick(60)
+# ------------------------------------------------------- #
+# ******************************************************************************************************************* #
 
 
 # ------------------------ MENU ------------------------- #
@@ -91,47 +202,7 @@ def afficher_menu():
 # ------------------------------------------------------- #
 
 
-
-# -------------------- PAGE ACCUEIL --------------------- #
-'''
-Affiche l'écran d'accueil avec les boutons 'Jouer' et 'Quitter'.
-Boucle jusqu'à que le joueur clique sur 'Jouer' ou 'Quitter'.
-'''
-
-def page_accueil():
-    en_cours = True
-    while en_cours:
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                pg.quit()
-                sys.exit()
-            if event.type == pg.MOUSEBUTTONDOWN:
-                if btn_jouer.collidepoint(event.pos):
-                    en_cours = False # Lancement du jeu
-                if btn_quitter.collidepoint(event.pos):
-                    pg.quit()
-                    sys.exit()
-
-        screen.blit(background_image, (0, 0))
-
-        # --- Bouton Jouer ---
-        pg.draw.rect(screen, BLEU, btn_jouer, border_radius=15)
-        txt_jouer = font_bouton.render("Jouer", True, BLANC)
-        screen.blit(txt_jouer, (btn_jouer.centerx - txt_jouer.get_width()//2,
-                                btn_jouer.centery - txt_jouer.get_height()//2))
-
-        # --- Bouton Quitter ---
-        pg.draw.rect(screen, ROUGE, btn_quitter, border_radius=15)
-        txt_quitter = font_bouton.render("Quitter", True, BLANC)
-        screen.blit(txt_quitter, (btn_quitter.centerx - txt_quitter.get_width()//2,
-                                  btn_quitter.centery - txt_quitter.get_height()//2))
-
-        pg.display.flip()
-        clock.tick(60)
-# ------------------------------------------------------- #
-
-
-
+# ******************************************************************************************************************* #
 # ------------------------- JEU ------------------------- #
 '''
 Fonction principale du jeu.
@@ -475,6 +546,7 @@ def jeu():
 
     return retour_menu
 # ------------------------------------------------------- #
+# ******************************************************************************************************************* #
 
 
 # ------------------------ MAIN ------------------------- #
